@@ -3,7 +3,7 @@ import numpy as np
 
 count=0
 # 이미지 불러오기
-filename='black3'
+filename='00'
 img = cv2.imread(f"{filename}.jpg", cv2.IMREAD_COLOR)
 img = cv2.resize(img, (800, 600))  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
 
