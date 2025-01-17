@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 color=(0,0,0)
 count=0
 # 이미지 불러오기
-filename='2'
+filename='02'
 img = cv2.imread(f"{filename}.jpg", cv2.IMREAD_COLOR)
 image=img
 img = cv2.resize(img, (800, 600))  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
@@ -163,3 +163,4 @@ for i, cnt in enumerate(filtered_contours):
 print(len(realcontour))
 # 결과 출력
 cv2.imshow("Contours with Color Analysis_final", img)
+cv2.waitKey(5000)  # 5000ms = 5초 동안 대기
