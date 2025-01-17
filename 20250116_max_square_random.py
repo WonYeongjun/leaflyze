@@ -130,3 +130,4 @@ for i, cnt in enumerate(filtered_contours):
 print(len(realcontour))
 # 결과 출력
 cv2.imshow("Contours with Color Analysis", img)
+cv2.waitKey(5000)  # 5000ms = 5초 동안 대기

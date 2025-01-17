@@ -114,3 +114,4 @@ def save_individual_contours_as_svg(contours, img_size):
         print(f"Saved: {svg_filename}")
 
 save_individual_contours_as_svg(filtered_contours, image_size)
+cv2.waitKey(5000)  # 5000ms = 5초 동안 대기
