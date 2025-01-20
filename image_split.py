@@ -21,7 +21,9 @@ import numpy as np
 
 count=0
 img = cv2.imread(f"{filename}.jpg", cv2.IMREAD_COLOR)
-img = cv2.resize(img, (800, 600))  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
+size=img.shape[:2]
+print(size)
+img = cv2.resize(img, (800,600))  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
 
 def remove_overlapping_contours(contours, img_size=(500, 500)):
     # 컨투어 리스트 정렬 (면적 기준 내림차순)
@@ -118,12 +120,12 @@ output_image = cv2.drawMatches(template, kp1, input_image, kp2, matches[:10], No
 cv2.imwrite("output.jpg", output_image)
 cv2.imshow('Matches', output_image)
 ##시각화(완료한 부분)
-# cv2.circle(img, img_point, 5, (0, 255, 0), -1)
-# cv2.circle(bottom_right, new_point, 5, (0, 255, 0), -1)
-# cv2.imshow("Contours with Color Analysis_final", img)
-# cv2.imshow("Top Left", top_left)
-# cv2.imshow("Top Right", top_right)
-# cv2.imshow("Bottom Left", bottom_left)
-# cv2.imshow("Bottom Right", bottom_right)
+cv2.circle(img, img_point, 5, (0, 255, 0), -1)
+cv2.circle(bottom_right, new_point, 5, (0, 255, 0), -1)
+cv2.imshow("Contours with Color Analysis_final", img)
+cv2.imshow("Top Left", top_left)
+cv2.imshow("Top Right", top_right)
+cv2.imshow("Bottom Left", bottom_left)
+cv2.imshow("Bottom Right", bottom_right)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
