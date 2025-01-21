@@ -1,5 +1,70 @@
+#ArUco 마커는 우상단 좌상단 좌하단 우하단 에 12, 18, 27, 5 순으로 배치(6*6크기의 마커)
+import subprocess
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
+
+#1 사진 촬영
+subprocess.run(["libcamera-jpeg", "-o", "/home/userk/cal_img/raw/raw_img.jpg", "--width", "1920", "--height", "1440"])
+
+print("사진 촬영 완료")
+
+#1.5 사진 회전(카메라가 뒤집혔을 때)
+# 이미지를 불러오기
+img0 = cv2.imread("/home/userk/cal_img/raw/raw_img.jpg")
+
+# 180도 회전
+rotated_img = cv2.rotate(img0, cv2.ROTATE_180)
+
+# 이미지를 저장
+save_path = "/home/userk/cal_img/raw/raw_img.jpg"
+cv2.imwrite(save_path, rotated_img)
+
+#2 왜곡보정
+def undistort_image(image_path, camera_matrix, dist_coeffs, target_size=(640*3, 480*3)):
+    # 원본 이미지 로드
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"Error: Cannot load image at {image_path}")
+        return None, None
+
+    # 이미지 크기 변경 (640x480)
+    image_resized = cv2.resize(image, target_size)
+
+    # 왜곡 보정
+    h, w = image_resized.shape[:2]
+    new_camera_matrix, roi = cv2.getOptimalNewCameraMatrix(camera_matrix, dist_coeffs, (w, h), 1, (w, h))
+    undistorted_image = cv2.undistort(image_resized, camera_matrix, dist_coeffs, None, new_camera_matrix)
+
+    return image_resized, undistorted_image
+
+# MAIN: 실행
+if __name__ == "__main__":
+    # 카메라 매트릭스 및 왜곡 계수
+    camera_matrix = np.array(
+        [
+            [1.90296778e+03, 0.00000000e+00, 9.62538876e+02],
+            [0.00000000e+00, 1.90259449e+03, 6.99587164e+02],
+            [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+        ]
+    )
+
+    dist_coeffs = np.array([-0.00159553,  0.25363958, -0.00156397,  0.00185892, -0.41956662])
+
+    # 테스트 이미지 경로
+    image_path = "/home/userk/cal_img/raw/raw_img.jpg"  # 촬영한 이미지 경로
+
+    # 왜곡 보정
+    original, undistorted = undistort_image(image_path, camera_matrix, dist_coeffs)
+
+    if original is not None and undistorted is not None:
+        # 보정된 이미지 저장
+        save_path = "/home/userk/cal_img/cal/cal_img.jpg"
+        cv2.imwrite(save_path, undistorted)
+        print(f"Undistorted image saved to {save_path}")
+
+
+#3 원근감 보정
 # 아루코 표식의 크기 (실제 크기 또는 픽셀 크기)
 marker_length = 0.03  # 실제 크기 (예: 10cm)
 arUco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)  # 아루코 사전 정의

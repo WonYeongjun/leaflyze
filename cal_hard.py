@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 def undistort_image(image_path, camera_matrix, dist_coeffs, target_size=(640, 480)):
     # 원본 이미지 로드
@@ -19,35 +18,18 @@ def undistort_image(image_path, camera_matrix, dist_coeffs, target_size=(640, 48
 
     return image_resized, undistorted_image
 
-def display_images(original, undistorted):
-    # 보정 전후 이미지 비교
-    plt.figure(figsize=(12, 6))
-
-    # 원본 이미지
-    plt.subplot(1, 2, 1)
-    plt.title("Original Image")
-    plt.imshow(cv2.cvtColor(original, cv2.COLOR_BGR2RGB))
-    plt.axis("off")
-
-    # 보정된 이미지
-    plt.subplot(1, 2, 2)
-    plt.title("Undistorted Image")
-    plt.imshow(cv2.cvtColor(undistorted, cv2.COLOR_BGR2RGB))
-    plt.axis("off")
-
-    plt.tight_layout()
-    plt.show()
-
 # MAIN: 실행
 if __name__ == "__main__":
     # 카메라 매트릭스 및 왜곡 계수
-    camera_matrix = np.array([[952.75667022, 0., 314.25038594],
- [0., 955.94124563, 226.34545152],
- [0., 0., 1.]]
-)
+    camera_matrix = np.array(
+        [
+            [1.90296778e+03, 0.00000000e+00, 9.62538876e+02],
+            [0.00000000e+00, 1.90259449e+03, 6.99587164e+02],
+            [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+        ]
+    )
 
-    dist_coeffs = np.array([-2.20130434e-01, 3.76069302e+00, -1.56098886e-03, -5.58736611e-04, -1.97092180e+01]
-)
+    dist_coeffs = np.array([-0.00159553,  0.25363958, -0.00156397,  0.00185892, -0.41956662])
 
     # 테스트 이미지 경로
     image_path = "/home/userk/cal_img/raw/raw_img.jpg"  # 촬영한 이미지 경로
@@ -56,5 +38,7 @@ if __name__ == "__main__":
     original, undistorted = undistort_image(image_path, camera_matrix, dist_coeffs)
 
     if original is not None and undistorted is not None:
-        # 이미지 비교
-        display_images(original, undistorted)
+        # 보정된 이미지 저장
+        save_path = "/home/userk/cal_img/cal/cal_img.jpg"
+        cv2.imwrite(save_path, undistorted)
+        print(f"Undistorted image saved to {save_path}")
