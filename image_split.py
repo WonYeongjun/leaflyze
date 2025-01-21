@@ -1,7 +1,8 @@
 import cv2
 import math
+from sklearn.cluster import KMeans
 
-filename='box2'
+filename='box'
 
 #이미지 4분할
 def split_image(image, point, angle):
@@ -64,7 +65,6 @@ for i, cnt in enumerate(contours):
             cnt= cv2.approxPolyDP(cnt, 0.0001* peri, True) 
             print(cnt.shape)
             realcontour.append(cnt)
-            
 filtered_contours=remove_overlapping_contours(realcontour)
 
 for i, cnt in enumerate(filtered_contours):
@@ -114,34 +114,62 @@ def marker_detector(side):
     # 매칭 결과를 거리 기준으로 정렬
     matches = sorted(matches, key=lambda x: x.distance)
     for match in matches:
-        count+=1
-        if count>30:
-            break
         # 첫 번째 이미지의 특징점 좌표
         pt1 = kp1[match.queryIdx].pt
         # 두 번째 이미지의 특징점 좌표
         pt2 = kp2[match.trainIdx].pt
         points1.append(pt1)
         points2.append(pt2)
+            # 출력
+
     if points1 and points2:
         avg_x1 = np.mean([pt[0] for pt in points1])
         avg_y1 = np.mean([pt[1] for pt in points1])
         avg_x2 = np.mean([pt[0] for pt in points2])
         avg_y2 = np.mean([pt[1] for pt in points2])
+
         print(f"Template Image Average (x, y): ({avg_x1:.2f}, {avg_y1:.2f})")
         print(f"Input Image Average (x, y): ({avg_x2:.2f}, {avg_y2:.2f})")
     else:
         print("No matches found.")
-    return kp1,kp2,matches,input_image,(avg_x1,avg_y1), (avg_x2,avg_y2)
+    print(len(matches))
+    points = [kp2[match.trainIdx].pt for match in matches]
+    points = np.array(points)  # 리스트를 numpy 배열로 변환
+
+    # K-Means 군집화
+    k = 7  # 클러스터 개수 (적절히 설정)
+    kmeans = KMeans(n_clusters=k, random_state=0)
+    kmeans.fit(points)
+
+    # 각 좌표의 클러스터 레이블
+    labels = kmeans.labels_
+
+    # 가장 많은 좌표가 속한 클러스터 찾기
+    unique_labels, counts = np.unique(labels, return_counts=True)
+    largest_cluster_label = unique_labels[np.argmax(counts)]
+
+    # 가장 큰 클러스터에 속한 좌표들만 추출
+    largest_cluster_points = points[labels == largest_cluster_label]
+
+    # 평균 좌표 계산
+    if len(largest_cluster_points) > 0:
+        kavg_x = np.mean(largest_cluster_points[:, 0])
+        kavg_y = np.mean(largest_cluster_points[:, 1])
+        print(f"Largest Cluster Average (x, y): ({kavg_x:.2f}, {kavg_y:.2f})")
+    else:
+        print("No points in the largest cluster.")
+    return kp1,kp2,matches,input_image,(avg_x1,avg_y1), (avg_x2,avg_y2),(kavg_x,kavg_y)
 
 sides=[top_left,top_right,bottom_right,bottom_left]
 tem_xy=[(0,0),(0,0),(0,0),(0,0)]
 image_xy=[(0,0),(0,0),(0,0),(0,0)]
+kimage_xy=[(0,0),(0,0),(0,0),(0,0)]
 
 for i, side in enumerate(sides):
-    kp1,kp2,matches, input_image,tem_xy[i],image_xy[i]=marker_detector(side)
+    kp1,kp2,matches, input_image,tem_xy[i],image_xy[i],kimage_xy[i]=marker_detector(side)
     output_image = cv2.drawMatches(template, kp1, input_image, kp2, matches[:30], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     cv2.circle(sides[i], (int(image_xy[i][0]),int(image_xy[i][1])), 5, (0, 255, 0), -1)
+    cv2.circle(sides[i], (int(kimage_xy[i][0]),int(kimage_xy[i][1])), 5, (0, 255,355), -1)    
 cv2.imwrite("output.jpg", output_image)
 print(len(matches))
 cv2.imshow('Matches', output_image)
