@@ -1,7 +1,7 @@
 import cv2
 import math
 
-filename='box'
+filename='box2'
 
 #이미지 4분할
 def split_image(image, point, angle):
@@ -77,8 +77,11 @@ print('ans')
 print(len(filtered_contours))
 
 point=(cX,cY)
+print(point)
 image = cv2.imread(f"{filename}.jpg", cv2.IMREAD_COLOR)
-image = cv2.resize(image, (800, 600))  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
+point=(int(image.shape[1]*cX/800),int(image.shape[0]*cY/600))
+print(point)
+# image = cv2.resize(image, (800, 600))  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
 top_left, top_right, bottom_left, bottom_right = split_image(image, point,0)
 # 결과 출력
 new_point=(50,60)
@@ -93,39 +96,66 @@ elif (loc==4):
     imgx+=cX
     imgy+=cY
 img_point=(int(imgx),int(imgy))
-
-##마커 찾기
-
-#마커 설정
 template = cv2.imread('marker_4.png', 0)
-orb = cv2.ORB_create()
-kp1, des1 = orb.detectAndCompute(template, None)
 
-#입력할 부분 설정
-input_image=cv2.cvtColor(top_left, cv2.COLOR_BGR2GRAY) #여기다
-kp2, des2 = orb.detectAndCompute(input_image, None)
+def marker_detector(side):
+    count=0
+    orb = cv2.ORB_create()
+    kp1, des1 = orb.detectAndCompute(template, None)
+    #입력할 부분 설정
+    input_image=cv2.cvtColor(side, cv2.COLOR_BGR2GRAY) #여기다
+    kp2, des2 = orb.detectAndCompute(input_image, None)
 
-bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-matches = bf.match(des1, des2)
-matches = sorted(matches, key=lambda x: x.distance)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    matches = bf.match(des1, des2)
+    points1 = []  # 템플릿 이미지에서의 매칭된 특징점 좌표
+    points2 = []  # 입력 이미지에서의 매칭된 특징점 좌표
 
-for match in matches:
-    pt1 = kp1[match.queryIdx].pt
-    pt2 = kp2[match.trainIdx].pt
-    print(f"Match: QueryIdx={match.queryIdx}, TrainIdx={match.trainIdx}")
-    print(f"Image 1 (pt1): {pt1}, Image 2 (pt2): {pt2}")
+    # 매칭 결과를 거리 기준으로 정렬
+    matches = sorted(matches, key=lambda x: x.distance)
+    for match in matches:
+        count+=1
+        if count>30:
+            break
+        # 첫 번째 이미지의 특징점 좌표
+        pt1 = kp1[match.queryIdx].pt
+        # 두 번째 이미지의 특징점 좌표
+        pt2 = kp2[match.trainIdx].pt
+        points1.append(pt1)
+        points2.append(pt2)
+    if points1 and points2:
+        avg_x1 = np.mean([pt[0] for pt in points1])
+        avg_y1 = np.mean([pt[1] for pt in points1])
+        avg_x2 = np.mean([pt[0] for pt in points2])
+        avg_y2 = np.mean([pt[1] for pt in points2])
+        print(f"Template Image Average (x, y): ({avg_x1:.2f}, {avg_y1:.2f})")
+        print(f"Input Image Average (x, y): ({avg_x2:.2f}, {avg_y2:.2f})")
+    else:
+        print("No matches found.")
+    return kp1,kp2,matches,input_image,(avg_x1,avg_y1), (avg_x2,avg_y2)
 
-print(len(matches))
-output_image = cv2.drawMatches(template, kp1, input_image, kp2, matches[:10], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+sides=[top_left,top_right,bottom_right,bottom_left]
+tem_xy=[(0,0),(0,0),(0,0),(0,0)]
+image_xy=[(0,0),(0,0),(0,0),(0,0)]
+
+for i, side in enumerate(sides):
+    kp1,kp2,matches, input_image,tem_xy[i],image_xy[i]=marker_detector(side)
+    output_image = cv2.drawMatches(template, kp1, input_image, kp2, matches[:30], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    cv2.circle(sides[i], (int(image_xy[i][0]),int(image_xy[i][1])), 5, (0, 255, 0), -1)
 cv2.imwrite("output.jpg", output_image)
+print(len(matches))
 cv2.imshow('Matches', output_image)
-##시각화(완료한 부분)
+#시각화(완료한 부분)
 cv2.circle(img, img_point, 5, (0, 255, 0), -1)
 cv2.circle(bottom_right, new_point, 5, (0, 255, 0), -1)
 cv2.imshow("Contours with Color Analysis_final", img)
+top_left=cv2.resize(top_left,(int(top_left.shape[1]*0.2),int(top_left.shape[0]*0.2)))
 cv2.imshow("Top Left", top_left)
+top_right=cv2.resize(top_right,(int(top_right.shape[1]*0.2),int(top_right.shape[0]*0.2)))
 cv2.imshow("Top Right", top_right)
+bottom_left=cv2.resize(bottom_left,(int(bottom_left.shape[1]*0.2),int(bottom_left.shape[0]*0.2)))
 cv2.imshow("Bottom Left", bottom_left)
+bottom_right=cv2.resize(bottom_right,(int(bottom_right.shape[1]*0.2),int(bottom_right.shape[0]*0.2)))
 cv2.imshow("Bottom Right", bottom_right)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
