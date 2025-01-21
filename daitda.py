@@ -168,11 +168,12 @@ sides=[top_left,top_right,bottom_right,bottom_left] #순서 바꾸기
 tem_xy=[(0,0),(0,0),(0,0),(0,0)]
 image_xy=[(0,0),(0,0),(0,0),(0,0)]
 kimage_xy=[(0,0),(0,0),(0,0),(0,0)]
-
+real_circle=[]
 for i, side in enumerate(sides):
     kp1,kp2,matches, input_image,tem_xy[i],image_xy[i],kimage_xy[i]=marker_detector(side)
     output_image = cv2.drawMatches(template, kp1, input_image, kp2, matches[:30], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
     cv2.circle(sides[i], (int(image_xy[i][0]),int(image_xy[i][1])), 5, (0, 255, 0), -1)
+    real_circle.append((int(kimage_xy[i][0]),int(kimage_xy[i][1])))
     cv2.circle(sides[i], (int(kimage_xy[i][0]),int(kimage_xy[i][1])), 20, (0, 255,255), -1)    
 cv2.imwrite("output.jpg", output_image)
 print(len(matches))
@@ -189,5 +190,6 @@ bottom_left=cv2.resize(bottom_left,(int(bottom_left.shape[1]*0.2),int(bottom_lef
 cv2.imshow("Bottom Left", bottom_left)
 bottom_right=cv2.resize(bottom_right,(int(bottom_right.shape[1]*0.2),int(bottom_right.shape[0]*0.2)))
 cv2.imshow("Bottom Right", bottom_right)
+print(f"점 4개 좌표{real_circle}")
 cv2.waitKey(0)
 cv2.destroyAllWindows()
