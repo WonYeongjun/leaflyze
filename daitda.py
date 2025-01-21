@@ -98,18 +98,16 @@ print(result.shape)
 top_left, top_right, bottom_left, bottom_right = split_image(result, point,0)
 
 # 결과 출력
-new_point=(50,60)
-imgx=new_point[0]
-imgy=new_point[1]
-loc=4
-if (loc==2):
-    imgx+=cX   
-elif (loc==3):
-    imgy+=cY
-elif (loc==4):
-    imgx+=cX
-    imgy+=cY
-img_point=(int(imgx),int(imgy))
+def where(imgx,imgy,loc):
+    if (loc==1):
+        imgx+=cX*scale_x   
+    elif (loc==3):
+        imgy+=cY*scale_y
+    elif (loc==2):
+        imgx+=cX*scale_x
+        imgy+=cY*scale_y
+    img_point=(int(imgx),int(imgy))
+    return img_point
 template = cv2.imread('marker_4.png', 0)
 
 def marker_detector(side):
@@ -178,10 +176,19 @@ for i, side in enumerate(sides):
 cv2.imwrite("output.jpg", output_image)
 print(len(matches))
 cv2.imshow('Matches', output_image)
+
+new_point=(200,150)
+img_point=where(new_point[0],new_point[1],3)
+for i in range(4):
+    real_circle[i]=where(real_circle[i][0],real_circle[i][1],i)
+    cv2.circle(image, real_circle[i], 10, (0, 0, 255), -1)
 #시각화(완료한 부분)
-cv2.circle(img, img_point, 5, (0, 255, 0), -1)
-cv2.circle(bottom_right, new_point, 5, (0, 255, 0), -1)
-cv2.imshow("Contours with Color Analysis_final", img)
+print(img_point)
+print(bottom_left.shape)
+cv2.circle(image, img_point, 5, (0, 255, 0), -1)
+cv2.circle(bottom_left, new_point, 5, (0, 255, 0), -1)
+image=cv2.resize(image,(int(image.shape[1]*0.2),int(image.shape[0]*0.2)))
+cv2.imshow("Contours with Color Analysis_final", image)
 top_left=cv2.resize(top_left,(int(top_left.shape[1]*0.2),int(top_left.shape[0]*0.2)))
 cv2.imshow("Top Left", top_left)
 top_right=cv2.resize(top_right,(int(top_right.shape[1]*0.2),int(top_right.shape[0]*0.2)))
