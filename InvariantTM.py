@@ -282,7 +282,7 @@ def invariant_match_template(
             print(total_diff)
             if total_diff < rgbdiff_thresh:
                 color_filtered_list.append(
-                    [point_info[0], point_info[1], point_info[2]]
+                    [point_info[0], point_info[1], point_info[2], point_info[3]]
                 )
         return color_filtered_list
     else:
