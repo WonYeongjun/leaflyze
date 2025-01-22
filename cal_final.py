@@ -117,8 +117,8 @@ if ids is not None:
         print(f"pts1 (marker centers): {pts1}")
 
         # 정면에서 본 이미지의 4개의 좌표 (임의로 설정한 예시)
-        width = 500  # 변환 후 출력 이미지의 너비
-        height = 500  # 변환 후 출력 이미지의 높이
+        width = 300*4  # 변환 후 출력 이미지의 너비
+        height = 355*4  # 변환 후 출력 이미지의 높이
         pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
 
         # 호모그래피 행렬 계산
