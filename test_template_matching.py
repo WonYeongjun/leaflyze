@@ -7,9 +7,9 @@ import matplotlib as mpl
 from InvariantTM import template_crop, invariant_match_template
 
 if __name__ == "__main__":
-    img_bgr = cv2.imread("cloth5.jpg")
+    img_bgr = cv2.imread("./image/cloth5.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    template_bgr = plt.imread("file.jpg")
+    template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(template_bgr, (0, 0), fx=0.22, fy=0.22)
     template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
     # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
