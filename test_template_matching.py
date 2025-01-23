@@ -7,13 +7,13 @@ import matplotlib as mpl
 from InvariantTM import template_crop, invariant_match_template
 
 if __name__ == "__main__":
-    img_bgr = cv2.imread("./image/cloth4.jpg")
+    img_bgr = cv2.imread("./image/cloth5.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(template_bgr, (0, 0), fx=0.2, fy=0.2)
     template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
-    _, img_binary = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY)
+    _, img_binary = cv2.threshold(img_gray, 150, 255, cv2.THRESH_BINARY)
     img_rgb = cv2.cvtColor(img_binary, cv2.COLOR_GRAY2RGB)
     # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
     # template_rgb = cv2.cvtColor(cv2.Canny(template_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1)
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
-    points_list = points_list[:7]
+    points_list = points_list[:4]
     reference_angle = points_list[0][1]
 
     # 각도 차이를 기준으로 정렬
