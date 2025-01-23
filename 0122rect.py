@@ -2,7 +2,7 @@ import cv2
 import math
 from sklearn.cluster import DBSCAN
 
-filename = "cloth4"
+filename = "./image/box"
 
 
 # 이미지 4분할
@@ -222,7 +222,7 @@ def where(imgx, imgy, loc):
     return img_point
 
 
-template = cv2.imread("marker43.png", 0)
+template = cv2.imread("./image/marker_ideal.jpg", 0)
 
 
 def marker_detector(side):
