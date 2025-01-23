@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 
-from InvariantTM import template_crop, invariant_match_template
+from InvariantTM import invariant_match_template  # ,template_crop
 
 if __name__ == "__main__":
     img_bgr = cv2.imread("./image/cloth5.jpg")
