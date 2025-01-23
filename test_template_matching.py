@@ -4,7 +4,11 @@ from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 
-from InvariantTM import invariant_match_template  # ,template_crop
+from InvariantTM1 import invariant_match_template  # ,template_crop
+import time
+
+# 시작 시간 기록
+start_time = time.time()
 
 if __name__ == "__main__":
     img_bgr = cv2.imread("./image/cloth5.jpg")
@@ -17,7 +21,7 @@ if __name__ == "__main__":
     template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
     _, img_binary = cv2.threshold(
-        img_gray, 150, 255, cv2.THRESH_BINARY
+        img_gray, 127, 255, cv2.THRESH_BINARY
     )  # 실제 이미지 이진화
     img_rgb = cv2.cvtColor(img_binary, cv2.COLOR_GRAY2RGB)
     # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
@@ -37,9 +41,9 @@ if __name__ == "__main__":
         rgbimage=img_rgb,
         rgbtemplate=cropped_template_rgb,
         method="TM_CCOEFF_NORMED",
-        matched_thresh=0.2,
+        matched_thresh=0.4,
         rot_range=[-30, 30],
-        rot_interval=3,
+        rot_interval=1,
         scale_range=[90, 110],
         scale_interval=1,
         rm_redundant=True,
@@ -48,13 +52,14 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1)
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
-    points_list = points_list[:4]
+    points_list = points_list[:7]
     reference_angle = points_list[0][1]
 
     # 각도 차이를 기준으로 정렬
     points_list = sorted(points_list, key=lambda x: abs(x[1] - reference_angle))
     points_list = points_list[:4]
     centers_list = []
+
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
@@ -91,6 +96,7 @@ if __name__ == "__main__":
         ax.add_patch(rectangle)
         plt.legend(handles=[rectangle])
     # plt.grid(True)
+    end_time = time.time()
     plt.show()
     fig2, ax2 = plt.subplots(1)
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Centers")
@@ -105,3 +111,6 @@ if __name__ == "__main__":
             color="red",
         )
     plt.show()
+    # 걸린 시간 계산
+    elapsed_time = end_time - start_time
+    print(f"작업에 걸린 시간: {elapsed_time} 초")
