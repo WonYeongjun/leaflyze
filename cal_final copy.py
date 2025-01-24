@@ -7,7 +7,10 @@ import matplotlib.pyplot as plt
 
 # 1.5 사진 회전(카메라가 뒤집혔을 때)
 # 이미지를 불러오기
-img0 = cv2.imread("C:/Users/UserK/Desktop/cal_img/raw/raw_img.jpg")
+img0 = cv2.imread("C:/Users/UserK/Desktop/cal_img/raw/image.png")
+# cv2.imshow("original", img0)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 # 180도 회전
 rotated_img = cv2.rotate(img0, cv2.ROTATE_180)
