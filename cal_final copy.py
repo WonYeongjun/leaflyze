@@ -61,7 +61,7 @@ if __name__ == "__main__":
     )
 
     # 테스트 이미지 경로
-    image_path = "C:/Users/UserK/Desktop/cal_img/raw/raw_img.jpg"  # 촬영한 이미지 경로
+    image_path = "C:/Users/UserK/Desktop/cal_img/raw/image.png"  # 촬영한 이미지 경로
 
     # 왜곡 보정
     original, undistorted = undistort_image(image_path, camera_matrix, dist_coeffs)
@@ -76,14 +76,14 @@ if __name__ == "__main__":
 # 3 원근감 보정
 # 아루코 표식의 크기 (실제 크기 또는 픽셀 크기)
 marker_length = 0.03  # 실제 크기 (예: 10cm)
-arUco_dict = cv2.aruco.getPredefinedDictionary(
-    cv2.aruco.DICT_4X4_50
-)  # 아루코 사전 정의
+arUco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # 최신 함수 사용
 parameters = cv2.aruco.DetectorParameters()
 
 # 이미지를 불러오기
 img = cv2.imread("C:/Users/UserK/Desktop/cal_img/cal/cal_img.jpg")
-
+cv2.imshow("cal", img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 # 그레이스케일로 변환
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
