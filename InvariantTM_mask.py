@@ -85,6 +85,7 @@ def scale_image(image, percent, maxwh):
 def invariant_match_template(
     rgbimage,
     rgbtemplate,
+    maskmaker,
     method,
     matched_thresh,
     rot_range,
@@ -171,13 +172,21 @@ def invariant_match_template(
             scaled_template_gray, actual_scale = scale_image(
                 template_gray, next_scale, image_maxwh
             )
+            scaled_maskmaker, actual_scale = scale_image(
+                maskmaker, next_scale, image_maxwh
+            )
+            rotated_maskmaker = (
+                scaled_maskmaker
+                if next_angle == 0
+                else rotate_image(scaled_maskmaker, next_angle)
+            )
             rotated_template = (
                 scaled_template_gray
                 if next_angle == 0
                 else rotate_image(scaled_template_gray, next_angle)
             )
             matched_points = cv2.matchTemplate(
-                img_gray, rotated_template, cv2.TM_CCOEFF_NORMED
+                img_gray, rotated_template, cv2.TM_CCOEFF_NORMED, mask=rotated_maskmaker
             )
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
             if max_val >= matched_thresh:
