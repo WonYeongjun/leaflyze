@@ -1,11 +1,16 @@
-#ArUco 마커는 우상단 좌상단 좌하단 우하단 에 12, 18, 27, 5 순으로 배치(6*6크기의 마커)
+#ArUco 마커는 좌상단 우상단 우하단 좌하단 에 12, 18, 27, 5 순으로 배치(6*6크기의 마커)
 import subprocess
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
 #1 사진 촬영
-subprocess.run(["libcamera-jpeg", "-o", "/home/userk/cal_img/raw/raw_img.jpg", "--width", "1920", "--height", "1440"])
+subprocess.run([
+    "libcamera-jpeg", "-o", "/home/userk/cal_img/raw/raw_img.jpg",
+    "--width", "1920", "--height", "1440",
+    "--shutter", "5000",  # 셔터 속도 (마이크로초 단위, 값이 작을수록 어두워짐)
+    "--gain", "1"         # 감도 (ISO와 유사, 값이 작을수록 어두워짐)
+])
 
 print("사진 촬영 완료")
 
@@ -67,8 +72,9 @@ if __name__ == "__main__":
 #3 원근감 보정
 # 아루코 표식의 크기 (실제 크기 또는 픽셀 크기)
 marker_length = 0.03  # 실제 크기 (예: 10cm)
-arUco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)  # 아루코 사전 정의
-parameters = cv2.aruco.DetectorParameters_create()
+arUco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)  # 아루코 사전 정의
+parameters = cv2.aruco.DetectorParameters()
+
 
 # 이미지를 불러오기
 img = cv2.imread("/home/userk/cal_img/cal/cal_img.jpg")
@@ -77,7 +83,8 @@ img = cv2.imread("/home/userk/cal_img/cal/cal_img.jpg")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # 아루코 마커 검출
-corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, arUco_dict, parameters=parameters)
+detector = cv2.aruco.ArucoDetector(arUco_dict, parameters)
+corners, ids, rejectedImgPoints = detector.detectMarkers(gray)
 print(corners)
 print(ids)
 
@@ -130,6 +137,8 @@ if ids is not None:
         # 변환된 이미지 저장
         save_path = "/home/userk/cal_img/fin/fin_cal_img.jpg"
         cv2.imwrite(save_path, dst)
+        
+        
         print(f"Corrected image saved to {save_path}")
 
     else:
