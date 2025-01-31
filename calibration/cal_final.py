@@ -1,7 +1,30 @@
+#사진촬영 후 왜곡보정, 원근감 보정한 이미지 저장
+#ArUco 마커는 좌상단 우상단 우하단 좌하단 에 12, 18, 27, 5 순으로 배치(6*6크기의 마커)
 import subprocess
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
+#1 사진 촬영
+subprocess.run([
+    "libcamera-jpeg", "-o", "/home/userk/cal_img/raw/raw_img.jpg",
+    "--width", "1920", "--height", "1440",
+    "--shutter", "5000",  # 셔터 속도 (마이크로초 단위, 값이 작을수록 어두워짐)
+    "--gain", "1"         # 감도 (ISO와 유사, 값이 작을수록 어두워짐)
+])
+
+print("사진 촬영 완료")
+
+#1.5 사진 회전(카메라가 뒤집혔을 때)
+# 이미지를 불러오기
+img0 = cv2.imread("/home/userk/cal_img/raw/raw_img.jpg")
+
+# 180도 회전
+rotated_img = cv2.rotate(img0, cv2.ROTATE_180)
+
+# 이미지를 저장
+save_path = "/home/userk/cal_img/raw/raw_img.jpg"
+cv2.imwrite(save_path, rotated_img)
 
 #2 왜곡보정
 def undistort_image(image_path, camera_matrix, dist_coeffs, target_size=(640*3, 480*3)):

@@ -1,3 +1,4 @@
+#십자 이미지에서 픽셀-실제거리 사이 계수 도출
 import cv2
 import numpy as np
 import math

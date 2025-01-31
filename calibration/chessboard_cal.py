@@ -1,3 +1,4 @@
+#20장의 체스보드 패턴을 찾을때까지 반복, 20장이 모이면 계수 도출
 import cv2
 import numpy as np
 import time
@@ -15,7 +16,13 @@ def capture_and_find_chessboard(calibration_dir, num_images=20, checkerboard_siz
 
     # Picamera2 설정
     camera = Picamera2()
-    camera.configure(camera.create_preview_configuration())  # 해상도 설정 제거
+
+    # 해상도 설정 (4608x2592) 
+    camera.configure(camera.create_still_configuration(raw={'size': (1920, 1440)}))
+
+    # 미리보기 해상도를 캡처 해상도와 동일하게 설정
+    preview_config = camera.create_preview_configuration(main={"size": (1920, 1440)})
+    camera.configure(preview_config)
 
     # 화면에 미리보기 활성화
     camera.start_preview(Preview.QTGL)
