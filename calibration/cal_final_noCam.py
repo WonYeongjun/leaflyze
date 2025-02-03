@@ -12,7 +12,7 @@ def undistort_image(image_path, camera_matrix, dist_coeffs, target_size=(640*3, 
         print(f"Error: Cannot load image at {image_path}")
         return None
 
-    # 이미지 크기 변경 (640x480)
+    # 이미지 크기 변경
     image_resized = cv2.resize(image, target_size)
 
     # 왜곡 보정
@@ -90,8 +90,8 @@ if __name__ == "__main__":
                 print(f"pts1 (marker centers): {pts1}")
 
                 # 정면에서 본 이미지의 4개의 좌표 (임의로 설정한 예시)
-                width = 1180  # 변환 후 출력 이미지의 너비
-                height = 780  # 변환 후 출력 이미지의 높이
+                width = 2360  # 변환 후 출력 이미지의 너비
+                height = 1560  # 변환 후 출력 이미지의 높이
                 pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
 
                 # 호모그래피 행렬 계산
