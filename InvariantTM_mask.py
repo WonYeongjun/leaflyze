@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 box_points = []
 button_down = False
@@ -113,6 +114,8 @@ def invariant_match_template(
     """
     img_gray = cv2.cvtColor(rgbimage, cv2.COLOR_RGB2GRAY)
     template_gray = cv2.cvtColor(rgbtemplate, cv2.COLOR_RGB2GRAY)
+    # img_gray = cv2.Canny(img_gray, 240, 240)
+    # template_gray = cv2.Canny(template_gray, 240, 240)
     image_maxwh = img_gray.shape
     height, width = template_gray.shape
     all_points = []
@@ -268,6 +271,7 @@ def invariant_match_template(
             all_points = sorted(all_points, key=lambda x: x[3])
         elif method == "TM_SQDIFF_NORMED":
             all_points = sorted(all_points, key=lambda x: x[3])
+
     if rm_redundant == True:
         lone_points_list = []
         visited_points_list = []
