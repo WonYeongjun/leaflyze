@@ -1,3 +1,4 @@
+#저장된 이미지를 가져와서 원근법 보정함
 import cv2
 import numpy as np
 
