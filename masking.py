@@ -11,18 +11,23 @@ import time
 start_time = time.time()
 
 if __name__ == "__main__":
-    img_bgr = cv2.imread("./image/fin_cal_img (4).jpg")
+    img_bgr = cv2.imread("./image/3/fin_img_7.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = cv2.imread("./image/marker_ideal.jpg", cv2.IMREAD_UNCHANGED)
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.255, fy=0.255
+        # template_bgr, (0, 0), fx=0.255, fy=0.255
+        template_bgr,
+        (0, 0),
+        fx=0.295,
+        fy=0.295,
     )  # 템플릿 사이즈 조절(촬영 후에 조정필요)
     formask = cv2.imread(
         # "./image/marker_ideal_back-removebg-preview.png", cv2.IMREAD_UNCHANGED
         "./image/marker_ideal_back.jpg",
         cv2.IMREAD_UNCHANGED,
     )
-    formask = cv2.resize(formask, (0, 0), fx=0.255, fy=0.255)
+    # formask = cv2.resize(formask, (0, 0), fx=0.255, fy=0.255)
+    formask = cv2.resize(formask, (0, 0), fx=0.295, fy=0.295)
     print(formask.shape)
     formask = formask[:, :, 3]
     print(formask.shape)
@@ -55,9 +60,9 @@ if __name__ == "__main__":
         method="TM_CCOEFF_NORMED",
         # method="TM_CCORR",
         matched_thresh=0.2,
-        rot_range=[-10, 10],
-        rot_interval=2,
-        scale_range=[90, 110],
+        rot_range=[-15, 15],
+        rot_interval=3,
+        scale_range=[85, 115],
         scale_interval=2,
         rm_redundant=True,
         minmax=True,
@@ -74,7 +79,7 @@ if __name__ == "__main__":
     points_list = sorted(points_list, key=lambda x: abs(x[1] - reference_angle))
     points_list = points_list[:7]
     centers_list = []
-
+    real_point = []
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
@@ -89,6 +94,11 @@ if __name__ == "__main__":
             s=20,
             color="red",
         )
+        idx = (
+            point[0] + (width / 2) * scale / 100,
+            point[1] + (height / 2) * scale / 100,
+        )
+        real_point.append([idx])
         plt.scatter(point[0], point[1], s=20, color="green")
         rectangle = patches.Rectangle(
             (point[0], point[1]),
@@ -129,7 +139,7 @@ if __name__ == "__main__":
     if len(indices) != 4:
         print("4개의 인덱스를 입력해야 합니다.")
     else:
-        selected_points = [points_list[i][0] for i in indices]
+        selected_points = [real_point[i][0] for i in indices]
         matrix = np.array(selected_points)
         print("선택된 점들의 좌표 행렬:")
         print(matrix)
@@ -178,6 +188,16 @@ if __name__ == "__main__":
     angle_vertical = (angle12 + angle03) / 2
     angle = ((90 - angle_vertical) + angle_horizontal) / 2
     print("직사각형의 회전 각도:", angle)
+    # 사각형 그리기
+    fig2, ax2 = plt.subplots(1)
+    plt.gcf().canvas.manager.set_window_title("Selected Rectangle")
+    ax2.imshow(img_rgb)
+    rect = patches.Polygon(
+        sorted_matrix, closed=True, edgecolor="r", facecolor="none", linewidth=2
+    )
+    ax2.add_patch(rect)
+    plt.scatter(center_x, center_y, s=50, color="blue")
+    plt.show()
     # fig2, ax2 = plt.subplots(1)
     # plt.gcf().canvas.manager.set_window_title("Template Matching Results: Centers")
     # ax2.imshow(img_rgb)

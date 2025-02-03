@@ -5,27 +5,6 @@ box_points = []
 button_down = False
 
 
-def remove_background(image, bg_color=(255, 255, 255)):
-    """
-    배경을 제거하고 마커만 남기는 함수.
-    image: 입력 이미지 (BGR 형식)
-    bg_color: 배경 색상 (기본값: 흰색)
-    """
-    # BGR에서 RGBA로 변환 (알파 채널 추가)
-    if image.shape[-1] == 3:  # BGR 포맷
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
-
-    # 배경 마스크 생성
-    lower_bound = np.array([bg_color[0] - 10, bg_color[1] - 10, bg_color[2] - 10, 0])
-    upper_bound = np.array([bg_color[0] + 10, bg_color[1] + 10, bg_color[2] + 10, 255])
-    mask = cv2.inRange(image, lower_bound, upper_bound)
-
-    # 배경 투명화
-    image[mask == 255] = (0, 0, 0, 0)  # 배경을 투명하게 설정
-
-    return image
-
-
 def rotate_image(image, angle):
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, -angle, 1.0)
@@ -191,7 +170,6 @@ def invariant_match_template(
                 for next_scale in range(scale_range[0], scale_range[1], scale_interval)
             ]
             all_points = [result for future in tasks if (result := future.result())]
-            print(result)
         # for next_angle in range(rot_range[0], rot_range[1], rot_interval):
         #     for next_scale in range(scale_range[0], scale_range[1], scale_interval):
         #         scaled_template_gray, actual_scale = scale_image(

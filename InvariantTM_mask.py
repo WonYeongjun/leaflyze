@@ -196,7 +196,7 @@ def invariant_match_template(
                 return [max_loc, next_angle, actual_scale, max_val]
             return None
 
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=6) as executor:
             tasks = [
                 executor.submit(process_template, next_angle, next_scale)
                 for next_angle in range(rot_range[0], rot_range[1], rot_interval)
