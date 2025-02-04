@@ -26,7 +26,7 @@ def capture_photo():
         "libcamera-jpeg", "-o", LOCAL_FILE,
         "--width", "7680", "--height", "5760",
         "--shutter", "5000",
-        "--gain", "1"
+        "--gain", "3"
     ])
     print("✅ 사진 촬영 완료!")
 
