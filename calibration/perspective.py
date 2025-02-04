@@ -46,7 +46,7 @@ def correct_perspective(image_path, output_path):
             print(f"pts1 (selected marker corners): {pts1}")
             
             # 변환 후 기준이 될 좌표
-            width, height = 4500, 3500
+            width, height = 4200, 2970
             pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
             
             # 호모그래피 행렬 계산
