@@ -24,7 +24,7 @@ def capture_photo():
     print("📸 사진 촬영 중...")
     subprocess.run([
         "libcamera-jpeg", "-o", LOCAL_FILE,
-        "--width", "7680", "--height", "5760",
+        "--width", "4608", "--height", "2592",
         "--shutter", "5000",
         "--gain", "3"
     ])
