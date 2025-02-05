@@ -12,7 +12,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 160
-    img_bgr = cv2.imread("./image/glass/pink_20.jpg")
+    img_bgr = cv2.imread("./exm/glass/pink_20.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
