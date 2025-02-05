@@ -25,7 +25,7 @@ def capture_photo():
     subprocess.run([
     "libcamera-jpeg", "-o", "marker.jpg",
     "--width", "4608", "--height", "2592",
-    "--shutter", "3000", "--gain", "3",
+    "--shutter", "3000", "--gain", "15",
     "--ev", "-1", "--contrast", "2.0",
     "--brightness", "-0.1", "--sharpness", "2.0",
     "--awb", "greyworld"
