@@ -3,35 +3,53 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
-
-from InvariantTM1 import invariant_match_template  # ,template_crop
+import random
+from InvariantTM2 import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
 start_time = time.time()
 
 if __name__ == "__main__":
-    img_bgr = cv2.imread("./image/fin_cal_img (3).jpg")
+    threshold = 160
+    img_bgr = cv2.imread("./image/glass/pink_20.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.28, fy=0.28
+        template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(촬영 후에 조정필요)
 
     template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
+
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
-    alpha = 1.5  # 조정 강도 (1보다 크면 밝기 증가, 1보다 작으면 감소)
+
+    # alpha = 1.2  # 조정 강도 (1보다 크면 밝기 증가, 1보다 작으면 감소)
+    # img_gray = cv2.convertScaleAbs(img_gray, alpha=alpha, beta=0)
+
+    # def gamma_correction(img, gamma=0.5):
+    #     lookup_table = np.array(
+    #         [(i / 255.0) ** gamma * 255 for i in range(256)]
+    #     ).astype(np.uint8)
+    #     return cv2.LUT(img, lookup_table)
+
+    # clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8, 8))
+    # # img_gray = clahe.apply(img_gray)
+    # img_gray = gamma_correction(img_gray, gamma=0.5)
+
+    # _, img_gray = cv2.threshold(
+    #     img_gray, 80, 255, cv2.THRESH_BINARY
+    # 실제 이미지 이진화
+    im = img_gray
     img_gray = np.where(
-        img_gray > 100,
-        np.minimum(img_gray * alpha, 255),
-        np.maximum(img_gray / alpha, 0),
-    ).astype(np.uint8)
-    # _, img_binary = cv2.threshold(
-    #     img_gray, 127, 255, cv2.THRESH_BINARY
-    # )  # 실제 이미지 이진화
-    # img_binary[img_binary == 0] = 1
-    # img_rgb = cv2.cvtColor(img_binary, cv2.COLOR_GRAY2RGB)
+        img_gray > threshold,
+        np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
+        np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
+    )
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
+
+    template_gray = cv2.cvtColor(template_rgb, cv2.COLOR_RGB2GRAY)
+    _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
+    template_rgb = cv2.cvtColor(template_gray, cv2.COLOR_GRAY2RGB)
 
     # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
     # template_rgb = cv2.cvtColor(cv2.Canny(template_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
@@ -46,22 +64,28 @@ if __name__ == "__main__":
     # plt.imshow(cropped_template_rgb)
     # plt.show()
 
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    ax1.imshow(im, cmap="gray")
+    ax1.set_title("Original Grayscale Image")
+    ax2.imshow(img_gray, cmap="gray")
+    ax2.set_title("Processed Grayscale Image")
+    plt.show()
     points_list = invariant_match_template(
         rgbimage=img_rgb,
         rgbtemplate=cropped_template_rgb,
         method="TM_CCOEFF_NORMED",
-        matched_thresh=0.3,
-        rot_range=[-10, 10],
-        rot_interval=1,
-        scale_range=[90, 110],
-        scale_interval=1,
+        matched_thresh=0.1,
+        rot_range=[-15, 15],
+        rot_interval=2,
+        scale_range=[80, 120],
+        scale_interval=4,
         rm_redundant=True,
         minmax=True,
     )
     fig, ax = plt.subplots(1)
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
-    points_list = [point for point in points_list if point[3] != float("inf")]
+    points_list = [point for point in points_list if point[4] != float("inf")]
     # points_list = points_list[:7]
     # reference_angle = points_list[0][1]
 
@@ -73,27 +97,27 @@ if __name__ == "__main__":
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
-        scale = point_info[2]
+        scale = (point_info[2], point_info[3])
         print(
-            f"matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[3]}"
+            f"No.{str(points_list.index(point_info))} matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[4]}"
         )
         centers_list.append([point, scale])
         plt.scatter(
-            point[0] + (width / 2) * scale / 100,
-            point[1] + (height / 2) * scale / 100,
+            point[0] + (width / 2) * scale[0] / 100,
+            point[1] + (height / 2) * scale[1] / 100,
             s=20,
             color="red",
         )
         idx = (
-            point[0] + (width / 2) * scale / 100,
-            point[1] + (height / 2) * scale / 100,
+            point[0] + (width / 2) * scale[0] / 100,
+            point[1] + (height / 2) * scale[1] / 100,
         )
         real_point.append([idx])
         plt.scatter(point[0], point[1], s=20, color="green")
         rectangle = patches.Rectangle(
             (point[0], point[1]),
-            width * scale / 100,
-            height * scale / 100,
+            width * scale[0] / 100,
+            height * scale[1] / 100,
             color="red",
             alpha=0.50,
             label="Matched box",
@@ -109,8 +133,8 @@ if __name__ == "__main__":
 
         transform = (
             mpl.transforms.Affine2D().rotate_deg_around(
-                point[0] + width / 2 * scale / 100,
-                point[1] + height / 2 * scale / 100,
+                point[0] + width / 2 * scale[0] / 100,
+                point[1] + height / 2 * scale[1] / 100,
                 angle,
             )
             + ax.transData
@@ -130,8 +154,6 @@ if __name__ == "__main__":
     else:
         selected_points = [real_point[i][0] for i in indices]
         matrix = np.array(selected_points)
-        print("선택된 점들의 좌표 행렬:")
-        print(matrix)
 
         # 좌표를 오른쪽 위, 왼쪽 위, 왼쪽 아래, 오른쪽 아래 순서로 정렬
         def sort_points(points):
