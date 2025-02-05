@@ -23,10 +23,12 @@ def capture_photo():
     """사진을 촬영하고 Windows로 전송"""
     print("📸 사진 촬영 중...")
     subprocess.run([
-        "libcamera-jpeg", "-o", LOCAL_FILE,
-        "--width", "4608", "--height", "2592",
-        "--shutter", "5000",
-        "--gain", "20"
+    "libcamera-jpeg", "-o", "marker.jpg",
+    "--width", "4608", "--height", "2592",
+    "--shutter", "3000", "--gain", "3",
+    "--ev", "-1", "--contrast", "2.0",
+    "--brightness", "-0.1", "--sharpness", "2.0",
+    "--awb", "greyworld"
     ])
     print("✅ 사진 촬영 완료!")
 
