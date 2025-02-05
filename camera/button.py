@@ -59,7 +59,7 @@ def send_file_to_windows():
         print("✅ 파일 전송 완료!")
 
         # Windows에서 perspective_win.py 실행
-        command = 'python "C:/Users/UserK/Desktop/perspective_win.py"'
+        command = 'python "C:/Users/UserK/Desktop/cal+marker.py"'
         stdin, stdout, stderr = ssh.exec_command(command)
 
         # 입력이 필요한 경우 자동 입력 (필요한 경우 수정 가능)
