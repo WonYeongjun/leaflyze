@@ -19,19 +19,30 @@ REMOTE_PATH = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # Windows 저장 경로
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
+
 def capture_photo():
     """사진을 촬영하고 Windows로 전송 및 실행"""
     print("📸 사진 촬영 중...")
-    subprocess.run([
-        "libcamera-jpeg", "-o", LOCAL_FILE,
-        "--width", "4608", "--height", "2592",
-        "--shutter", "5000",
-        "--gain", "15"
-    ])
+    subprocess.run(
+        [
+            "libcamera-jpeg",
+            "-o",
+            LOCAL_FILE,
+            "--width",
+            "4608",
+            "--height",
+            "2592",
+            "--shutter",
+            "5000",
+            "--gain",
+            "15",
+        ]
+    )
     print("✅ 사진 촬영 완료!")
 
     # Windows로 파일 전송 및 실행
     send_file_to_windows()
+
 
 def send_file_to_windows():
     """SSH(SFTP)를 사용하여 Windows로 파일 전송 및 실행"""
@@ -48,7 +59,7 @@ def send_file_to_windows():
         print("✅ 파일 전송 완료!")
 
         # Windows에서 perspective_win.py 실행
-        command = 'python "C:/Users/UserK/Desktop/perspective_win.py"'
+        command = 'python "C:/Users/UserK/Desktop/cal+marker.py"'
         stdin, stdout, stderr = ssh.exec_command(command)
 
         # 실행 결과 출력
@@ -61,10 +72,12 @@ def send_file_to_windows():
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
 
+
 def button_callback(channel):
     """버튼이 눌리면 실행"""
     print("🔘 버튼이 눌렸습니다!")
     threading.Thread(target=capture_photo, daemon=True).start()
+
 
 GPIO.add_event_detect(BUTTON_PIN, GPIO.RISING, callback=button_callback, bouncetime=200)
 
