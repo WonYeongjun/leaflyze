@@ -4,23 +4,23 @@ import subprocess
 import threading
 import paramiko
 
-BUTTON_PIN = 17  # GPIO 17 (핀 번호 11)
+BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 
 # Windows PC의 SSH 정보
-HOST = "192.168.143.60"  # Windows PC의 IP
-PORT = 22  # SSH 포트
-USERNAME = "USERK"  # Windows 계정
-PASSWORD = "1234"  # Windows 비밀번호
+HOST = "192.168.143.60"  # Windows PC의 IP 주소
+PORT = 22  # SSH 포트 (기본: 22)
+USERNAME = "USERK"  # Windows 계정 이름
+PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
 
 # 파일 경로 설정
-LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"  # 라즈베리파이의 촬영 파일
-REMOTE_PATH = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # Windows 저장 경로
+LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"  # 라즈베리파이의 촬영 파일 위치
+REMOTE_PATH = "C:/Users/UserK/Desktop/raw_img.jpg"  # Windows 저장 경로
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def capture_photo():
-    """사진을 촬영하고 Windows로 전송"""
+    """사진을 촬영하고 Windows로 전송 및 실행"""
     print("📸 사진 촬영 중...")
     subprocess.run([
         "libcamera-jpeg", "-o", LOCAL_FILE,
@@ -34,7 +34,7 @@ def capture_photo():
     send_file_to_windows()
 
 def send_file_to_windows():
-    """SSH(SFTP)를 사용하여 Windows로 파일 전송"""
+    """SSH(SFTP)를 사용하여 Windows로 파일 전송 및 실행"""
     try:
         print("📂 파일 전송 중...")
         ssh = paramiko.SSHClient()
@@ -44,11 +44,22 @@ def send_file_to_windows():
         sftp = ssh.open_sftp()
         sftp.put(LOCAL_FILE, REMOTE_PATH)
         sftp.close()
-        ssh.close()
 
         print("✅ 파일 전송 완료!")
+        
+        # Windows에서 실행할 명령 (perspective_win.py 실행)
+        command = 'python "C:/Users/UserK/Desktop/perspective_win.py"'
+        stdin, stdout, stderr = ssh.exec_command(command)
+        
+        # 실행 결과 출력
+        print(stdout.read().decode())
+        print(stderr.read().decode())
+
+        ssh.close()
+        print("🚀 Windows에서 perspective_win.py 실행 완료!")
+        
     except Exception as e:
-        print(f"❌ 파일 전송 중 오류 발생: {e}")
+        print(f"❌ 오류 발생: {e}")
 
 def button_callback(channel):
     """버튼이 눌리면 실행"""
