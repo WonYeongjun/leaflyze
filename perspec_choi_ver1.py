@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+
 # 아루코 표식의 크기 (실제 크기 또는 픽셀 크기)
 marker_length = 0.03  # 실제 크기 (예: 10cm)
 arUco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)  # 아루코 사전 정의
@@ -12,7 +13,9 @@ img = cv2.imread("/home/userk/cal_img/cal/cal_img.jpg")
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # 아루코 마커 검출
-corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(gray, arUco_dict, parameters=parameters)
+corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(
+    gray, arUco_dict, parameters=parameters
+)
 print(corners)
 print(ids)
 
@@ -35,7 +38,7 @@ if ids is not None:
             # 중심 좌표를 리스트에 추가
             marker_centers.append([center_x, center_y])
 
-# 마커들의 순서를 desired_ids에 맞게 재정렬
+    # 마커들의 순서를 desired_ids에 맞게 재정렬
     marker_centers_sorted = []
     for marker_id in desired_ids:
         for i, id in enumerate(ids):
@@ -54,7 +57,10 @@ if ids is not None:
         # 정면에서 본 이미지의 4개의 좌표 (임의로 설정한 예시)
         width = 500  # 변환 후 출력 이미지의 너비
         height = 500  # 변환 후 출력 이미지의 높이
-        pts2 = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
+        pts2 = np.array(
+            [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]],
+            dtype="float32",
+        )
 
         # 호모그래피 행렬 계산
         matrix, mask = cv2.findHomography(pts1, pts2)
@@ -71,5 +77,3 @@ if ids is not None:
         print("Not enough markers detected to calculate perspective.")
 else:
     print("No ArUco markers detected.")
-
-
