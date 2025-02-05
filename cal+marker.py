@@ -82,7 +82,7 @@ if __name__ == "__main__":
     img_bgr = correct_perspective(test_image_path)
     # plt.imshow(img_bgr)
     # plt.show()
-    threshold = 160
+    threshold = 130
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
