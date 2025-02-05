@@ -13,7 +13,7 @@ USERNAME = "USERK"  # Windows 계정
 PASSWORD = "1234"  # Windows 비밀번호
 
 # 파일 경로 설정
-LOCAL_FILE = "/home/userk/raw_img.jpg"  # 라즈베리파이에서 저장하는 파일
+LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"  # 라즈베리파이의 촬영 파일
 REMOTE_PATH = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # Windows 저장 경로
 
 GPIO.setmode(GPIO.BCM)
@@ -25,10 +25,8 @@ def capture_photo():
     subprocess.run([
         "libcamera-jpeg", "-o", LOCAL_FILE,
         "--width", "4608", "--height", "2592",
-        "--shutter", "3000", "--gain", "15",
-        "--ev", "-1", "--contrast", "2.0",
-        "--brightness", "-0.1", "--sharpness", "2.0",
-        "--awb", "greyworld"
+        "--shutter", "5000",
+        "--gain", "20"
     ])
     print("✅ 사진 촬영 완료!")
 
@@ -41,12 +39,12 @@ def send_file_to_windows():
         print("📂 파일 전송 중...")
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(HOST, port=PORT, username=USERNAME, password=PASSWORD)
+        ssh.connect(HOST, PORT, USERNAME, PASSWORD)
 
         sftp = ssh.open_sftp()
         sftp.put(LOCAL_FILE, REMOTE_PATH)
-        sftp.close()  # SFTP 세션 먼저 닫기
-        ssh.close()  # SSH 세션 닫기
+        sftp.close()
+        ssh.close()
 
         print("✅ 파일 전송 완료!")
     except Exception as e:
