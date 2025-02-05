@@ -78,9 +78,9 @@ def correct_perspective(image_path):
 
 
 if __name__ == "__main__":
-    test_image_path = "./image/cal+marker.jpg"  # 원본 이미지 경로
+    test_image_path = "./exm/glass/white_15_raw.jpg"  # 원본 이미지 경로
     img_bgr = correct_perspective(test_image_path)
-    # plt.imshow(image)
+    # plt.imshow(img_bgr)
     # plt.show()
     threshold = 160
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)

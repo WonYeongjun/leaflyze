@@ -155,7 +155,7 @@ def invariant_match_template(
             )
 
             matched_points = cv2.matchTemplate(
-                img_gray, rotated_template, cv2.TM_CCOEFF_NORMED
+                img_gray, rotated_template, cv2.TM_CCOEFF
             )
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
             if max_val >= matched_thresh:
