@@ -60,9 +60,9 @@ def send_file_to_windows():
 
         # Windows에서 perspective_win.py 실행
         # shell=ssh.invoke_shell()
-        command = 'start C:\\Users\\UserK\\Desktop\\run_script.bat'
+        # command = 'start C:\\Users\\UserK\\Desktop\\run_script.bat'
         # ssh.exec_command(command)
-        # command = 'start cmd /k python "C:/Users/UserK/Desktop/cal+marker.py"'
+        command = 'start cmd /k python "C:/Users/UserK/Desktop/cal+marker.py"'
         # shell.send(command)
         # time.sleep(1)
         stdin, stdout, stderr = ssh.exec_command(command)
