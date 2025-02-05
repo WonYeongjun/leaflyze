@@ -11,7 +11,7 @@ import time
 start_time = time.time()
 
 if __name__ == "__main__":
-    img_bgr = cv2.imread("./image/3/fin_img_7.jpg")
+    img_bgr = cv2.imread("./exm/glass/pink_20.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = cv2.imread("./image/marker_ideal.jpg", cv2.IMREAD_UNCHANGED)
     template_bgr = cv2.resize(
