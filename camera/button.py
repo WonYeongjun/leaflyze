@@ -59,20 +59,23 @@ def send_file_to_windows():
         print("✅ 파일 전송 완료!")
 
         # Windows에서 perspective_win.py 실행
+        shell=ssh.invoke_shell()
         command = 'start cmd /k python "C:/Users/UserK/Desktop/cal+marker.py"'
-        stdin, stdout, stderr = ssh.exec_command(command)
+        shell.send(command)
+        time.sleep(1)
+        # stdin, stdout, stderr = ssh.exec_command(command)
         print("실행 시작")
 
         # 입력이 필요한 경우 자동 입력 (필요한 경우 수정 가능)
-        stdin.write("your_input_value\n")
-        stdin.flush()
+        # stdin.write("your_input_value\n")
+        # stdin.flush()
 
-        # 실행 결과 실시간 출력
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.readline().strip())
-            if stderr.channel.recv_ready():
-                print(stderr.readline().strip())
+        # # 실행 결과 실시간 출력
+        # while not stdout.channel.exit_status_ready():
+        #     if stdout.channel.recv_ready():
+        #         print(stdout.readline().strip())
+        #     if stderr.channel.recv_ready():
+        #         print(stderr.readline().strip())
 
         ssh.close()
         print("🚀 Windows에서 perspective_win.py 실행 완료!")
