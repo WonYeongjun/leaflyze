@@ -1,6 +1,7 @@
+# 저장된 이미지를 가져와서 원근법 보정함
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 import random
@@ -10,14 +11,85 @@ import time
 # 시작 시간 기록
 start_time = time.time()
 
+
+# 원근 보정 함수
+def correct_perspective(image_path):
+    # 이미지 로드
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"Error: Cannot load image at {image_path}")
+        return
+
+    # 이미지 크기 및 중심 계산
+    h, w, _ = image.shape
+    image_center = np.array([w / 2, h / 2])
+
+    # 그레이스케일 변환
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # 아루코 마커 검출
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
+    parameters = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+
+    corners, ids, _ = detector.detectMarkers(gray)
+
+    # 원하는 마커 ID 순서
+    desired_ids = [12, 18, 27, 5]
+
+    if ids is not None:
+        marker_points = []
+
+        # 검출된 마커에서 원하는 ID 찾기
+        for marker_id in desired_ids:
+            for i, detected_id in enumerate(ids):
+                if detected_id[0] == marker_id:
+                    marker_corners = corners[i][0]  # 4개의 꼭짓점 좌표
+                    # 이미지 중심과 가장 가까운 꼭짓점 선택
+                    closest_corner = min(
+                        marker_corners, key=lambda pt: np.linalg.norm(pt - image_center)
+                    )
+                    marker_points.append(closest_corner)
+                    break
+
+        # 모든 마커가 감지된 경우 원근 변환 수행
+        if len(marker_points) == 4:
+            pts1 = np.array(marker_points, dtype="float32")
+            print(f"pts1 (selected marker corners): {pts1}")
+
+            # 변환 후 기준이 될 좌표
+            width, height = 4200, 2970
+            pts2 = np.array(
+                [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]],
+                dtype="float32",
+            )
+
+            # 호모그래피 행렬 계산
+            matrix, _ = cv2.findHomography(pts1, pts2)
+
+            # 원근 변환 적용
+            dst = cv2.warpPerspective(image, matrix, (width, height))
+        else:
+            print("Not enough markers detected to calculate perspective.")
+    else:
+        print("No ArUco markers detected.")
+
+    return dst
+
+
 if __name__ == "__main__":
+    test_image_path = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # 원본 이미지 경로
+    # test_image_path = "C:\\Users\\UserK\\Desktop\\raw\\rawraw.jpg"  # 원본 이미지 경로
+
+    img_bgr = correct_perspective(test_image_path)
+    # plt.imshow(img_bgr)
+    # plt.show()
     threshold = 130
-    img_bgr = cv2.imread("./image/glass/pink_15.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.3, fy=0.3
-    )  # 템플릿 사이즈 조절(초기 설정 필요)
+        template_bgr, (0, 0), fx=0.27, fy=0.27
+    )  # 템플릿 사이즈 조절(촬영 후에 조정필요)
 
     template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
 
@@ -67,7 +139,7 @@ if __name__ == "__main__":
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
     ax1.imshow(im, cmap="gray")
     ax1.set_title("Original Grayscale Image")
-    ax2.imshow(img_gray, cmap="gray")
+    ax2.imshow(template_gray, cmap="gray")
     ax2.set_title("Processed Grayscale Image")
     plt.show()
     points_list = invariant_match_template(
@@ -77,7 +149,7 @@ if __name__ == "__main__":
         matched_thresh=0.1,
         rot_range=[-15, 15],
         rot_interval=2,
-        scale_range=[70, 130],
+        scale_range=[80, 120],
         scale_interval=4,
         rm_redundant=True,
         minmax=True,
@@ -85,13 +157,13 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(1)
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
-    # points_list = [point for point in points_list if point[4] != float("inf")]
-    points_list = points_list[:20]
+    points_list = [point for point in points_list if point[4] != float("inf")]
+    # points_list = points_list[:7]
     # reference_angle = points_list[0][1]
 
     # # 각도 차이를 기준으로 정렬
     # points_list = sorted(points_list, key=lambda x: abs(x[1] - reference_angle))
-    # points_list = points_list[:20]
+    # points_list = points_list[:7]
     centers_list = []
     real_point = []
     for point_info in points_list:
