@@ -7,8 +7,8 @@ import paramiko
 BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 
 # Windows PC의 SSH 정보
-HOST = "192.168.143.60"  # Windows PC의 IP 주소
-# HOST = "172.30.1.42" # 영준 IP
+# HOST = "192.168.143.60"  # Windows PC의 IP 주소
+HOST = "172.30.1.42" # 영준 IP
 PORT = 22  # SSH 포트 (기본: 22)
 USERNAME = "USERK"  # Windows 계정 이름
 PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
@@ -62,7 +62,7 @@ def send_file_to_windows():
         # Windows에서 perspective_win.py 실행
 
         command = 'cmd /c "C:/Users/UserK/Desktop/run_script.bat"'
-        ssh.exec_command(command)
+        stdin,stdout,stderr=ssh.exec_command(command)
 
         print("실행 시작")
 
