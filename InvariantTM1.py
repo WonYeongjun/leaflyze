@@ -97,7 +97,7 @@ def invariant_match_template(
     all_points = []
 
     print("동그라미")
-    from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+    from concurrent.futures import ThreadPoolExecutor
 
     print(template_gray.shape)
 
@@ -114,18 +114,20 @@ def invariant_match_template(
         # 템플릿 매칭 (결과는 2차원 numpy 배열)
         result = cv2.matchTemplate(img_gray, rotated_template, cv2.TM_CCOEFF_NORMED)
 
+        # numpy 벡터화 연산을 사용해서 조건을 만족하는 인덱스들을 한 번에 추출
+        print(1)
+        ys, xs = np.where(result >= matched_thresh)
         matches = []
-        # numpy의 np.where 대신 순수 Python 반복문으로 배열을 순회
-        height, width = result.shape
-        for y in range(height):
-            for x in range(width):
-                score = result[y, x]
-                if score <= matched_thresh:
-                    matches.append([(x, y), next_angle, actual_scale, score])
-        print(next_angle, next_scale)
+        # 추출된 좌표와 점수를 list comprehension으로 matches 리스트에 저장
+        matches = [
+            ((int(x), int(y)), next_angle, next_scale, float(result[y, x]))
+            for y, x in zip(ys, xs)
+        ]
+        print(matches)
         return matches
 
-    with ProcessPoolExecutor() as executor:
+    # ThreadPoolExecutor를 이용한 병렬 처리
+    with ThreadPoolExecutor() as executor:
         tasks = [
             executor.submit(process_template, next_angle, next_scale)
             for next_angle in range(rot_range[0], rot_range[1], rot_interval)
@@ -133,22 +135,22 @@ def invariant_match_template(
         ]
         all_points = list(
             itertools.chain.from_iterable(
-                result for future in tasks if (result := future.result())
+                future.result() for future in tasks if future.result()
             )
         )
         print(len(all_points))
     if method == "TM_CCOEFF":
-        all_points = sorted(all_points, key=lambda x: -x[3])
+        all_points = sorted(all_points, key=lambda x: -x[1])
     elif method == "TM_CCOEFF_NORMED":
-        all_points = sorted(all_points, key=lambda x: -x[3])
+        all_points = sorted(all_points, key=lambda x: -x[1])
     elif method == "TM_CCORR":
-        all_points = sorted(all_points, key=lambda x: -x[3])
+        all_points = sorted(all_points, key=lambda x: -x[1])
     elif method == "TM_CCORR_NORMED":
-        all_points = sorted(all_points, key=lambda x: -x[3])
+        all_points = sorted(all_points, key=lambda x: -x[1])
     elif method == "TM_SQDIFF":
-        all_points = sorted(all_points, key=lambda x: x[3])
+        all_points = sorted(all_points, key=lambda x: x[1])
     elif method == "TM_SQDIFF_NORMED":
-        all_points = sorted(all_points, key=lambda x: x[3])
+        all_points = sorted(all_points, key=lambda x: x[1])
 
     def filter_redundant_points(points_chunk):
         # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
