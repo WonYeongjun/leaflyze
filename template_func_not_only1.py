@@ -60,7 +60,7 @@ def invariant_match_template(
         result = cv2.matchTemplate(img_gray, processed_template, cv2.TM_CCOEFF_NORMED)
 
         # numpy 벡터화 연산을 사용해서 조건을 만족하는 인덱스들을 한 번에 추출
-        # print(1)
+        print(1)
         ys, xs = np.where(result >= matched_thresh)
         matches = []
         # 추출된 좌표와 점수를 list comprehension으로 matches 리스트에 저장
@@ -73,7 +73,7 @@ def invariant_match_template(
             )
             for y, x in zip(ys, xs)
         ]
-        # print(matches)
+        print(matches)
         return matches
 
     # ThreadPoolExecutor를 이용한 병렬 처리

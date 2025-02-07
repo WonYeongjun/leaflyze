@@ -12,7 +12,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./exm/glass/white_15.jpg")
+    img_bgr = cv2.imread("./exm/glass/pink_10.jpg")
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.3,
+        matched_thresh=0.4,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
@@ -53,13 +53,6 @@ if __name__ == "__main__":
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
     print(len(points_list))
-    # points_list = [point for point in points_list if point[4] != float("inf")]
-    # points_list = points_list[:20]
-    # reference_angle = points_list[0][1]
-
-    # # 각도 차이를 기준으로 정렬
-    # points_list = sorted(points_list, key=lambda x: abs(x[1] - reference_angle))
-    # points_list = points_list[:20]
     centers_list = []
     real_point = []
     for point_info in points_list:
