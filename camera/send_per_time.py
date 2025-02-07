@@ -8,7 +8,7 @@ import os  # 파일명 추출을 위해 추가
 BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 
 # Windows PC의 SSH 정보
-HOST = "192.168.143.60"  # Windows PC의 IP 주소
+HOST = "192.168.0.2"  # Windows PC의 IP 주소
 #HOST = "172.30.1.42" # 영준 IP
 PORT = 22  # SSH 포트 (기본: 22)
 USERNAME = "USERK"  # Windows 계정 이름
