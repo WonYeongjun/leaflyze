@@ -4,66 +4,181 @@ from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 import random
-from InvariantTM1 import invariant_match_template  # ,template_crop
 import time
+import itertools
 
 # 시작 시간 기록
 start_time = time.time()
 
-if __name__ == "__main__":
-    threshold = 130
-    img_bgr = cv2.imread("./image/glass/pink_15.jpg")
-    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    template_bgr = plt.imread("./image/marker_ideal.jpg")
-    template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.27, fy=0.27
-    )  # 템플릿 사이즈 조절(초기 설정 필요)
+threshold = 130
+img_bgr = cv2.imread("./exm/glass/NewPink.jpg")
+template_bgr = plt.imread("./image/marker_ideal.jpg")
+template_bgr = cv2.resize(
+    template_bgr, (0, 0), fx=0.27, fy=0.27
+)  # 템플릿 사이즈 조절(초기 설정 필요)
 
-    template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
+img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_RGB2GRAY)
+im = img_gray
+img_gray = np.where(
+    img_gray > threshold,
+    np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
+    np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
+)
+img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
 
-    img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
+template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
+_, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
+height, width = template_gray.shape
 
-    # alpha = 1.2  # 조정 강도 (1보다 크면 밝기 증가, 1보다 작으면 감소)
-    # img_gray = cv2.convertScaleAbs(img_gray, alpha=alpha, beta=0)
 
-    # def gamma_correction(img, gamma=0.5):
-    #     lookup_table = np.array(
-    #         [(i / 255.0) ** gamma * 255 for i in range(256)]
-    #     ).astype(np.uint8)
-    #     return cv2.LUT(img, lookup_table)
+def rotate_image(image, angle):
+    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, -angle, 1.0)
+    result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
+    return result
 
-    # clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8, 8))
-    # # img_gray = clahe.apply(img_gray)
-    # img_gray = gamma_correction(img_gray, gamma=0.5)
 
-    # _, img_gray = cv2.threshold(
-    #     img_gray, 80, 255, cv2.THRESH_BINARY
-    # 실제 이미지 이진화
-    im = img_gray
-    img_gray = np.where(
-        img_gray > threshold,
-        np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
-        np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
+def scale_image(image, percent):
+    width = int(image.shape[1] * percent / 100)
+    height = int(image.shape[0] * percent / 100)
+    result = cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+    return result, percent
+
+
+def process_template(next_angle, next_scale):
+    scaled_template_gray, actual_scale = scale_image(template_gray, next_scale)
+    rotated_template = (
+        scaled_template_gray
+        if next_angle == 0
+        else rotate_image(scaled_template_gray, next_angle)
     )
-    img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
+    result = cv2.matchTemplate(img_gray, rotated_template, cv2.TM_CCOEFF_NORMED)
+    locations = np.where(result <= 0.4)
+    matches = []
+    x_coords = locations[1]
+    y_coords = locations[0]
+    scores = result[locations]
+    angles = np.full_like(scores, next_angle)
+    scales = np.full_like(scores, actual_scale)
 
-    template_gray = cv2.cvtColor(template_rgb, cv2.COLOR_RGB2GRAY)
-    _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
-    template_rgb = cv2.cvtColor(template_gray, cv2.COLOR_GRAY2RGB)
+    matches = np.column_stack((x_coords, y_coords, angles, scales, scores)).tolist()
+    # 모든 (x, y) 좌표와 점수 저장
+    print(next_angle, next_scale)
+    return matches
 
-    # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
-    # template_rgb = cv2.cvtColor(cv2.Canny(template_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
-    # canny = cv2.Canny(template_rgb, 240, 240)
 
-    # cropped_template_rgb = template_crop(template_rgb)
-    cropped_template_rgb = template_rgb
-    cropped_template_rgb = np.array(cropped_template_rgb)
-    cropped_template_gray = cv2.cvtColor(cropped_template_rgb, cv2.COLOR_RGB2GRAY)
-    height, width = cropped_template_gray.shape
-    # fig = plt.figure(num="Template - Close the Window to Continue >>>")
-    # plt.imshow(cropped_template_rgb)
-    # plt.show()
+def invariant_match_template(
+    grayimage,
+    graytemplate,
+    method,
+    matched_thresh,
+    rot_range,
+    rot_interval,
+    scale_range,
+    scale_interval,
+    rm_redundant,
+    minmax,
+    rgbdiff_thresh=float("inf"),
+):
+    img_gray = grayimage
+    template_gray = graytemplate
+    image_maxwh = img_gray.shape
+    height, width = template_gray.shape
+    all_points = []
 
+    print("동그라미")
+    from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+
+    print(template_gray.shape)
+
+    with ProcessPoolExecutor() as executor:
+        tasks = [
+            executor.submit(process_template, next_angle, next_scale)
+            for next_angle in range(rot_range[0], rot_range[1], rot_interval)
+            for next_scale in range(scale_range[0], scale_range[1], scale_interval)
+        ]
+        all_points = list(
+            itertools.chain.from_iterable(
+                result for future in tasks if (result := future.result())
+            )
+        )
+        print(len(all_points))
+    if method == "TM_CCOEFF":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_CCOEFF_NORMED":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_CCORR":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_CCORR_NORMED":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_SQDIFF":
+        all_points = sorted(all_points, key=lambda x: x[3])
+    elif method == "TM_SQDIFF_NORMED":
+        all_points = sorted(all_points, key=lambda x: x[3])
+
+    def filter_redundant_points(points_chunk):
+        # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
+        lone_points_list = []
+        visited_points_list = []
+
+        for point_info in points_chunk:
+            point = point_info[0]
+            scale = point_info[2]
+            all_visited_points_not_close = True
+
+            for visited_point in visited_points_list:
+                if (abs(visited_point[0] - point[0]) < (width * scale / 100)) and (
+                    abs(visited_point[1] - point[1]) < (height * scale / 100)
+                ):
+                    all_visited_points_not_close = False
+                    break  # 이미 가까운 점이 있으면 더 체크할 필요 없음
+
+            if all_visited_points_not_close:
+                lone_points_list.append(point_info)
+                visited_points_list.append(point)
+
+        return lone_points_list
+
+    if rm_redundant:
+        chunk_size = max(1, len(all_points) // 4)  # 스레드당 할당할 포인트 개수
+        chunks = [
+            all_points[i : i + chunk_size]
+            for i in range(0, len(all_points), chunk_size)
+        ]
+
+        with ThreadPoolExecutor() as executor2:
+            results = executor2.map(filter_redundant_points, chunks)
+
+        # 여러 스레드 결과를 합치면서 최종 중복 제거
+        final_lone_points = []
+        final_visited_points = []
+
+        for lone_points in results:
+            for point_info in lone_points:
+                point = point_info[0]
+                scale = point_info[2]
+                all_visited_points_not_close = True
+
+                for visited_point in final_visited_points:
+                    if (abs(visited_point[0] - point[0]) < (width * scale / 100)) and (
+                        abs(visited_point[1] - point[1]) < (height * scale / 100)
+                    ):
+                        all_visited_points_not_close = False
+                        break
+
+                if all_visited_points_not_close:
+                    final_lone_points.append(point_info)
+                    final_visited_points.append(point)
+
+        points_list = final_lone_points
+    else:
+        points_list = all_points
+    return points_list
+
+
+if __name__ == "__main__":
+
+    # 전처리된 이미지 시각화
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
     ax1.imshow(im, cmap="gray")
     ax1.set_title("Original Grayscale Image")
@@ -71,9 +186,9 @@ if __name__ == "__main__":
     ax2.set_title("Processed Grayscale Image")
     plt.show()
     points_list = invariant_match_template(
-        rgbimage=img_rgb,
-        rgbtemplate=cropped_template_rgb,
-        method="TM_SQDIFF",
+        grayimage=img_gray,
+        graytemplate=template_gray,
+        method="TM_CCOEFF_NORMED",
         matched_thresh=0.5,
         rot_range=[-10, 10],
         rot_interval=2,

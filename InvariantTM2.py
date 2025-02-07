@@ -109,6 +109,7 @@ def invariant_match_template(
         )
 
         matched_points = cv2.matchTemplate(img_gray, rotated_template, cv2.TM_CCOEFF)
+        # locations = np.where(result <= 0.4)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(
             matched_points
         )  # 한 번에 여러 개 뽑기

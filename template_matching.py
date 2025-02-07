@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 import random
-from InvariantTM2 import invariant_match_template  # ,template_crop
+from InvariantTM1 import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
@@ -12,7 +12,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./image/glass/pink_15.jpg")
+    img_bgr = cv2.imread("./exm/glass/NewPink.jpg")
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
