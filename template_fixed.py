@@ -16,7 +16,7 @@ if __name__ == "__main__":
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.3, fy=0.3
+        template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)
 
     template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
@@ -73,20 +73,21 @@ if __name__ == "__main__":
     points_list = invariant_match_template(
         rgbimage=img_rgb,
         rgbtemplate=cropped_template_rgb,
-        method="TM_CCOEFF_NORMED",
-        matched_thresh=0.1,
-        rot_range=[-15, 15],
+        method="TM_CCOEFF",
+        matched_thresh=0.4,
+        rot_range=[-10, 10],
         rot_interval=2,
-        scale_range=[70, 130],
-        scale_interval=4,
+        scale_range=[90, 110],
+        scale_interval=2,
         rm_redundant=True,
         minmax=True,
     )
     fig, ax = plt.subplots(1)
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
+    print(len(points_list))
     # points_list = [point for point in points_list if point[4] != float("inf")]
-    points_list = points_list[:20]
+    # points_list = points_list[:20]
     # reference_angle = points_list[0][1]
 
     # # 각도 차이를 기준으로 정렬
@@ -97,27 +98,27 @@ if __name__ == "__main__":
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
-        scale = (point_info[2], point_info[3])
+        scale = point_info[2]
         print(
-            f"No.{str(points_list.index(point_info))} matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[4]}"
+            f"No.{str(points_list.index(point_info))} matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[3]}"
         )
         centers_list.append([point, scale])
         plt.scatter(
-            point[0] + (width / 2) * scale[0] / 100,
-            point[1] + (height / 2) * scale[1] / 100,
+            point[0] + (width / 2) * scale / 100,
+            point[1] + (height / 2) * scale / 100,
             s=20,
             color="red",
         )
         idx = (
-            point[0] + (width / 2) * scale[0] / 100,
-            point[1] + (height / 2) * scale[1] / 100,
+            point[0] + (width / 2) * scale / 100,
+            point[1] + (height / 2) * scale / 100,
         )
         real_point.append([idx])
         plt.scatter(point[0], point[1], s=20, color="green")
         rectangle = patches.Rectangle(
             (point[0], point[1]),
-            width * scale[0] / 100,
-            height * scale[1] / 100,
+            width * scale / 100,
+            height * scale / 100,
             color="red",
             alpha=0.50,
             label="Matched box",
@@ -133,8 +134,8 @@ if __name__ == "__main__":
 
         transform = (
             mpl.transforms.Affine2D().rotate_deg_around(
-                point[0] + width / 2 * scale[0] / 100,
-                point[1] + height / 2 * scale[1] / 100,
+                point[0] + width / 2 * scale / 100,
+                point[1] + height / 2 * scale / 100,
                 angle,
             )
             + ax.transData
@@ -154,6 +155,8 @@ if __name__ == "__main__":
     else:
         selected_points = [real_point[i][0] for i in indices]
         matrix = np.array(selected_points)
+        print("선택된 점들의 좌표 행렬:")
+        print(matrix)
 
         # 좌표를 오른쪽 위, 왼쪽 위, 왼쪽 아래, 오른쪽 아래 순서로 정렬
         def sort_points(points):

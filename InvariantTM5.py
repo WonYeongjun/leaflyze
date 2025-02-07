@@ -102,31 +102,23 @@ def invariant_match_template(
     print(template_gray.shape)
 
     def process_template(next_angle, next_scale):
-        # 이미지 스케일링 및 회전
         scaled_template_gray, actual_scale = scale_image(
             template_gray, next_scale, image_maxwh
         )
-        if next_angle == 0:
-            rotated_template = scaled_template_gray
-        else:
-            rotated_template = rotate_image(scaled_template_gray, next_angle)
-
-        # 템플릿 매칭 (결과는 2차원 numpy 배열)
+        rotated_template = (
+            scaled_template_gray
+            if next_angle == 0
+            else rotate_image(scaled_template_gray, next_angle)
+        )
         result = cv2.matchTemplate(img_gray, rotated_template, cv2.TM_CCOEFF_NORMED)
-
-        # numpy 벡터화 연산을 사용해서 조건을 만족하는 인덱스들을 한 번에 추출
-        print(1)
-        ys, xs = np.where(result >= matched_thresh)
+        locations = np.where(result <= matched_thresh)
         matches = []
-        # 추출된 좌표와 점수를 list comprehension으로 matches 리스트에 저장
-        matches = [
-            ((int(x), int(y)), next_angle, next_scale, float(result[y, x]))
-            for y, x in zip(ys, xs)
-        ]
-        print(matches)
+
+        # 모든 (x, y) 좌표와 점수 저장
+        for (x, y), score in zip(zip(locations[1], locations[0]), result[locations]):
+            matches.append([(x, y), next_angle, actual_scale, score])
         return matches
 
-    # ThreadPoolExecutor를 이용한 병렬 처리
     with ThreadPoolExecutor() as executor:
         tasks = [
             executor.submit(process_template, next_angle, next_scale)
@@ -135,22 +127,77 @@ def invariant_match_template(
         ]
         all_points = list(
             itertools.chain.from_iterable(
-                future.result() for future in tasks if future.result()
+                result for future in tasks if (result := future.result())
             )
         )
         print(len(all_points))
+    # for next_angle in range(rot_range[0], rot_range[1], rot_interval):
+    #     for next_scale in range(scale_range[0], scale_range[1], scale_interval):
+    #         scaled_template_gray, actual_scale = scale_image(
+    #             template_gray, next_scale, image_maxwh
+    #         )
+    #         if next_angle == 0:
+    #             rotated_template = scaled_template_gray
+    #         else:
+    #             rotated_template = rotate_image(scaled_template_gray, next_angle)
+    #         if method == "TM_CCOEFF":
+    #             matched_points = cv2.matchTemplate(
+    #                 img_gray, rotated_template, cv2.TM_CCOEFF
+    #             )
+    #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+    #             if max_val >= matched_thresh:
+    #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
+    #         elif method == "TM_CCOEFF_NORMED":
+    #             matched_points = cv2.matchTemplate(
+    #                 img_gray, rotated_template, cv2.TM_CCOEFF_NORMED
+    #             )
+    #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+    #             if max_val >= matched_thresh:
+    #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
+    #         elif method == "TM_CCORR":
+    #             matched_points = cv2.matchTemplate(
+    #                 img_gray, rotated_template, cv2.TM_CCORR
+    #             )
+    #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+    #             if max_val >= matched_thresh:
+    #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
+    #         elif method == "TM_CCORR_NORMED":
+    #             matched_points = cv2.matchTemplate(
+    #                 img_gray, rotated_template, cv2.TM_CCORR_NORMED
+    #             )
+    #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+    #             if max_val >= matched_thresh:
+    #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
+    #         elif method == "TM_SQDIFF":
+    #             matched_points = cv2.matchTemplate(
+    #                 img_gray, rotated_template, cv2.TM_SQDIFF
+    #             )
+    #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+    #             if min_val <= matched_thresh:
+    #                 all_points.append([min_loc, next_angle, actual_scale, min_val])
+    #         elif method == "TM_SQDIFF_NORMED":
+    #             matched_points = cv2.matchTemplate(
+    #                 img_gray, rotated_template, cv2.TM_SQDIFF_NORMED
+    #             )
+    #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+    #             if min_val <= matched_thresh:
+    #                 all_points.append([min_loc, next_angle, actual_scale, min_val])
+    #         else:
+    #             raise MethodError(
+    #                 "There's no such comparison method for template matching."
+    #             )
     if method == "TM_CCOEFF":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCOEFF_NORMED":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCORR":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCORR_NORMED":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_SQDIFF":
-        all_points = sorted(all_points, key=lambda x: x[1])
+        all_points = sorted(all_points, key=lambda x: x[3])
     elif method == "TM_SQDIFF_NORMED":
-        all_points = sorted(all_points, key=lambda x: x[1])
+        all_points = sorted(all_points, key=lambda x: x[3])
 
     def filter_redundant_points(points_chunk):
         # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
@@ -182,8 +229,8 @@ def invariant_match_template(
             for i in range(0, len(all_points), chunk_size)
         ]
 
-        with ThreadPoolExecutor() as executor2:
-            results = executor2.map(filter_redundant_points, chunks)
+        with ThreadPoolExecutor() as executor:
+            results = executor.map(filter_redundant_points, chunks)
 
         # 여러 스레드 결과를 합치면서 최종 중복 제거
         final_lone_points = []

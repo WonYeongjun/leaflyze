@@ -103,31 +103,38 @@ def invariant_match_template(
     print("circle")
     from concurrent.futures import ThreadPoolExecutor
 
-    def process_template(next_scale):
+    def process_template(next_scale, n=5):  # 상위 n개 선택 가능
         rotated_template, actual_scale = scale_image(
             template_gray, next_scale, image_maxwh
         )
 
         matched_points = cv2.matchTemplate(img_gray, rotated_template, cv2.TM_CCOEFF)
-        # locations = np.where(result <= 0.4)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(
-            matched_points
-        )  # 한 번에 여러 개 뽑기
-        if max_val >= matched_thresh:
-            return [
-                max_loc,
-                actual_scale[2],
-                actual_scale[0],
-                actual_scale[1],
-                max_val,
-            ]
-        return None
+
+        # 상위 n개 찾기
+        flat_indices = np.argsort(matched_points.ravel())[::-1]  # 높은 값부터 정렬
+        top_n_indices = flat_indices[:n]
+        top_n_locs = [
+            np.unravel_index(idx, matched_points.shape) for idx in top_n_indices
+        ]
+        top_n_vals = [matched_points[loc] for loc in top_n_locs]
+
+        # 임계값 이상만 반환
+        results = [
+            (loc, actual_scale[2], actual_scale[0], actual_scale[1], val)
+            for loc, val in zip(top_n_locs, top_n_vals)
+            if val >= matched_thresh
+        ]
+
+        return results  # 리스트로 반환
 
     with ThreadPoolExecutor() as executor:
         tasks = [
-            executor.submit(process_template, next_scale) for next_scale in scale_tuple
+            executor.submit(process_template, next_scale, 5)  # 상위 5개 가져오기
+            for next_scale in scale_tuple
         ]
-        all_points = [result for future in tasks if (result := future.result())]
+
+        # 모든 결과 모으기
+        all_points = [result for future in tasks for result in future.result()]
     all_points = sorted(all_points, key=lambda x: -x[4])
     if rm_redundant == True:
         lone_points_list = []
