@@ -19,25 +19,7 @@ if __name__ == "__main__":
         template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)
 
-    template_rgb = cv2.cvtColor(template_bgr, cv2.COLOR_BGR2RGB)
-
     img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
-
-    # alpha = 1.2  # 조정 강도 (1보다 크면 밝기 증가, 1보다 작으면 감소)
-    # img_gray = cv2.convertScaleAbs(img_gray, alpha=alpha, beta=0)
-
-    # def gamma_correction(img, gamma=0.5):
-    #     lookup_table = np.array(
-    #         [(i / 255.0) ** gamma * 255 for i in range(256)]
-    #     ).astype(np.uint8)
-    #     return cv2.LUT(img, lookup_table)
-
-    # clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8, 8))
-    # # img_gray = clahe.apply(img_gray)
-    # img_gray = gamma_correction(img_gray, gamma=0.5)
-
-    # _, img_gray = cv2.threshold(
-    #     img_gray, 80, 255, cv2.THRESH_BINARY
     # 실제 이미지 이진화
     im = img_gray
     img_gray = np.where(
@@ -45,21 +27,17 @@ if __name__ == "__main__":
         np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
         np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
     )
-    img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
 
-    template_gray = cv2.cvtColor(template_rgb, cv2.COLOR_RGB2GRAY)
+    template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
-    template_rgb = cv2.cvtColor(template_gray, cv2.COLOR_GRAY2RGB)
 
     # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
     # template_rgb = cv2.cvtColor(cv2.Canny(template_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
     # canny = cv2.Canny(template_rgb, 240, 240)
 
     # cropped_template_rgb = template_crop(template_rgb)
-    cropped_template_rgb = template_rgb
-    cropped_template_rgb = np.array(cropped_template_rgb)
-    cropped_template_gray = cv2.cvtColor(cropped_template_rgb, cv2.COLOR_RGB2GRAY)
-    height, width = cropped_template_gray.shape
+
+    height, width = template_gray.shape
     # fig = plt.figure(num="Template - Close the Window to Continue >>>")
     # plt.imshow(cropped_template_rgb)
     # plt.show()
@@ -71,8 +49,8 @@ if __name__ == "__main__":
     ax2.set_title("Processed Grayscale Image")
     plt.show()
     points_list = invariant_match_template(
-        rgbimage=img_rgb,
-        rgbtemplate=cropped_template_rgb,
+        grayimage=img_gray,
+        graytemplate=template_gray,
         method="TM_CCOEFF",
         matched_thresh=0.4,
         rot_range=[-10, 10],

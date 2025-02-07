@@ -26,45 +26,9 @@ def scale_image(image, percent, maxwh):
     return result, percent
 
 
-# def click_and_crop(event, x, y, flags, param):
-#     global box_points, button_down
-#     if (button_down == False) and (event == cv2.EVENT_LBUTTONDOWN):
-#         button_down = True
-#         box_points = [(x, y)]
-#     elif (button_down == True) and (event == cv2.EVENT_MOUSEMOVE):
-#         image_copy = param.copy()
-#         point = (x, y)
-#         cv2.rectangle(image_copy, box_points[0], point, (0, 255, 0), 2)
-#         cv2.imshow("Template Cropper - Press C to Crop", image_copy)
-#     elif event == cv2.EVENT_LBUTTONUP:
-#         button_down = False
-#         box_points.append((x, y))
-#         cv2.rectangle(param, box_points[0], box_points[1], (0, 255, 0), 2)
-#         cv2.imshow("Template Cropper - Press C to Crop", param)
-
-
-# # GUI template cropping tool
-# def template_crop(image):
-#     clone = image.copy()
-#     cv2.namedWindow("Template Cropper - Press C to Crop")
-#     param = image
-#     cv2.setMouseCallback("Template Cropper - Press C to Crop", click_and_crop, param)
-#     while True:
-#         cv2.imshow("Template Cropper - Press C to Crop", image)
-#         key = cv2.waitKey(1)
-#         if key == ord("c"):
-#             cv2.destroyAllWindows()
-#             break
-#     if len(box_points) == 2:
-#         cropped_region = clone[
-#             box_points[0][1] : box_points[1][1], box_points[0][0] : box_points[1][0]
-#         ]
-#     return cropped_region
-
-
 def invariant_match_template(
-    rgbimage,
-    rgbtemplate,
+    grayimage,
+    graytemplate,
     method,
     matched_thresh,
     rot_range,
@@ -90,8 +54,8 @@ def invariant_match_template(
 
     Returns: List of satisfied matched points in format [[point.x, point.y], angle, scale].
     """
-    img_gray = cv2.cvtColor(rgbimage, cv2.COLOR_RGB2GRAY)
-    template_gray = cv2.cvtColor(rgbtemplate, cv2.COLOR_RGB2GRAY)
+    img_gray = grayimage
+    template_gray = graytemplate
     image_maxwh = img_gray.shape
     height, width = template_gray.shape
     all_points = []
@@ -209,29 +173,5 @@ def invariant_match_template(
         points_list = final_lone_points
     else:
         points_list = all_points
-    if rgbdiff_thresh != float("inf"):
-        print(">>>RGBDiff Filtering>>>")
-        color_filtered_list = []
-        template_channels = cv2.mean(rgbtemplate)
-        template_channels = np.array(
-            [template_channels[0], template_channels[1], template_channels[2]]
-        )
-        for point_info in points_list:
-            point = point_info[0]
-            cropped_img = rgbimage[
-                point[1] : point[1] + height, point[0] : point[0] + width
-            ]
-            cropped_channels = cv2.mean(cropped_img)
-            cropped_channels = np.array(
-                [cropped_channels[0], cropped_channels[1], cropped_channels[2]]
-            )
-            diff_observation = cropped_channels - template_channels
-            total_diff = np.sum(np.absolute(diff_observation))
-            print(total_diff)
-            if total_diff < rgbdiff_thresh:
-                color_filtered_list.append(
-                    [point_info[0], point_info[1], point_info[2], point_info[3]]
-                )
-        return color_filtered_list
-    else:
-        return points_list
+
+    return points_list
