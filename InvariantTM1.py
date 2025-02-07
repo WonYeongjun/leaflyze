@@ -50,10 +50,8 @@ def invariant_match_template(
     height, width = template_gray.shape
     all_points = []
 
-    print("동그라미")
+    print("템플릿 매칭 시작")
     from concurrent.futures import ThreadPoolExecutor
-
-    print(template_gray.shape)
 
     def process_template(scale_and_angle):
         # 이미지 스케일링 및 회전
@@ -62,7 +60,7 @@ def invariant_match_template(
         result = cv2.matchTemplate(img_gray, processed_template, cv2.TM_CCOEFF_NORMED)
 
         # numpy 벡터화 연산을 사용해서 조건을 만족하는 인덱스들을 한 번에 추출
-        print(1)
+        # print(1)
         ys, xs = np.where(result >= matched_thresh)
         matches = []
         # 추출된 좌표와 점수를 list comprehension으로 matches 리스트에 저장
@@ -75,7 +73,7 @@ def invariant_match_template(
             )
             for y, x in zip(ys, xs)
         ]
-        print(matches)
+        # print(matches)
         return matches
 
     # ThreadPoolExecutor를 이용한 병렬 처리
@@ -102,6 +100,8 @@ def invariant_match_template(
         all_points = sorted(all_points, key=lambda x: x[3])
     elif method == "TM_SQDIFF_NORMED":
         all_points = sorted(all_points, key=lambda x: x[3])
+    print("템플릿 매칭 완료")
+    print("중복 지점 제거 시작")
 
     def filter_redundant_points(points_chunk):
         # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
@@ -162,5 +162,6 @@ def invariant_match_template(
         points_list = final_lone_points
     else:
         points_list = all_points
+    print("중복 지점 제거 완료")
 
     return points_list

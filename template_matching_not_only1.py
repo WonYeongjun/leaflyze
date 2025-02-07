@@ -51,7 +51,7 @@ if __name__ == "__main__":
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.4,
+        matched_thresh=0.3,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
