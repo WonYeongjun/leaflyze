@@ -120,147 +120,45 @@ def invariant_match_template(
     image_maxwh = img_gray.shape
     height, width = template_gray.shape
     all_points = []
-    if minmax == False:
-        for next_angle in range(rot_range[0], rot_range[1], rot_interval):
-            for next_scale in range(scale_range[0], scale_range[1], scale_interval):
-                scaled_template_gray, actual_scale = scale_image(
-                    template_gray, next_scale, image_maxwh
-                )
-                if next_angle == 0:
-                    rotated_template = scaled_template_gray
-                else:
-                    rotated_template = rotate_image(scaled_template_gray, next_angle)
-                if method == "TM_CCOEFF":
-                    matched_points = cv2.matchTemplate(
-                        img_gray, rotated_template, cv2.TM_CCOEFF
-                    )
-                    satisfied_points = np.where(matched_points >= matched_thresh)
-                elif method == "TM_CCOEFF_NORMED":
-                    matched_points = cv2.matchTemplate(
-                        img_gray, rotated_template, cv2.TM_CCOEFF_NORMED
-                    )
-                    satisfied_points = np.where(matched_points >= matched_thresh)
-                elif method == "TM_CCORR":
-                    matched_points = cv2.matchTemplate(
-                        img_gray, rotated_template, cv2.TM_CCORR
-                    )
-                    satisfied_points = np.where(matched_points >= matched_thresh)
-                elif method == "TM_CCORR_NORMED":
-                    matched_points = cv2.matchTemplate(
-                        img_gray, rotated_template, cv2.TM_CCORR_NORMED
-                    )
-                    satisfied_points = np.where(matched_points >= matched_thresh)
-                elif method == "TM_SQDIFF":
-                    matched_points = cv2.matchTemplate(
-                        img_gray, rotated_template, cv2.TM_SQDIFF
-                    )
-                    satisfied_points = np.where(matched_points <= matched_thresh)
-                elif method == "TM_SQDIFF_NORMED":
-                    matched_points = cv2.matchTemplate(
-                        img_gray, rotated_template, cv2.TM_SQDIFF_NORMED
-                    )
-                    satisfied_points = np.where(matched_points <= matched_thresh)
-                else:
-                    raise MethodError(
-                        "There's no such comparison method for template matching."
-                    )
-                for pt in zip(*satisfied_points[::-1]):
-                    all_points.append([pt, next_angle, actual_scale])
-    else:
-        print("동그라미")
-        from concurrent.futures import ThreadPoolExecutor
 
-        print(template_gray.shape)
+    print("동그라미")
+    from concurrent.futures import ThreadPoolExecutor
 
-        def process_template(next_angle):
-            rotated_template, actual_scale = scale_image(
-                template_gray, next_angle, image_maxwh
-            )
-            rotated_maskmaker, actual_scale = scale_image(
-                maskmaker, next_angle, image_maxwh
-            )
-            matched_points = cv2.matchTemplate(
-                img_gray, rotated_template, cv2.TM_CCOEFF_NORMED, mask=rotated_maskmaker
-            )
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-            if max_val >= matched_thresh:
-                return [max_loc, actual_scale[1], actual_scale[0], max_val]
-            return None
+    print(template_gray.shape)
 
-        with ThreadPoolExecutor(max_workers=6) as executor:
-            tasks = [
-                executor.submit(process_template, next_angle)
-                for next_angle in scale_tuple
-            ]
-            all_points = [result for future in tasks if (result := future.result())]
-            print(result)
-        # for next_angle in range(rot_range[0], rot_range[1], rot_interval):
-        #     for next_scale in range(scale_range[0], scale_range[1], scale_interval):
-        #         scaled_template_gray, actual_scale = scale_image(
-        #             template_gray, next_scale, image_maxwh
-        #         )
-        #         if next_angle == 0:
-        #             rotated_template = scaled_template_gray
-        #         else:
-        #             rotated_template = rotate_image(scaled_template_gray, next_angle)
-        #         if method == "TM_CCOEFF":
-        #             matched_points = cv2.matchTemplate(
-        #                 img_gray, rotated_template, cv2.TM_CCOEFF
-        #             )
-        #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-        #             if max_val >= matched_thresh:
-        #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
-        #         elif method == "TM_CCOEFF_NORMED":
-        #             matched_points = cv2.matchTemplate(
-        #                 img_gray, rotated_template, cv2.TM_CCOEFF_NORMED
-        #             )
-        #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-        #             if max_val >= matched_thresh:
-        #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
-        #         elif method == "TM_CCORR":
-        #             matched_points = cv2.matchTemplate(
-        #                 img_gray, rotated_template, cv2.TM_CCORR
-        #             )
-        #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-        #             if max_val >= matched_thresh:
-        #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
-        #         elif method == "TM_CCORR_NORMED":
-        #             matched_points = cv2.matchTemplate(
-        #                 img_gray, rotated_template, cv2.TM_CCORR_NORMED
-        #             )
-        #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-        #             if max_val >= matched_thresh:
-        #                 all_points.append([max_loc, next_angle, actual_scale, max_val])
-        #         elif method == "TM_SQDIFF":
-        #             matched_points = cv2.matchTemplate(
-        #                 img_gray, rotated_template, cv2.TM_SQDIFF
-        #             )
-        #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-        #             if min_val <= matched_thresh:
-        #                 all_points.append([min_loc, next_angle, actual_scale, min_val])
-        #         elif method == "TM_SQDIFF_NORMED":
-        #             matched_points = cv2.matchTemplate(
-        #                 img_gray, rotated_template, cv2.TM_SQDIFF_NORMED
-        #             )
-        #             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
-        #             if min_val <= matched_thresh:
-        #                 all_points.append([min_loc, next_angle, actual_scale, min_val])
-        #         else:
-        #             raise MethodError(
-        #                 "There's no such comparison method for template matching."
-        #             )
-        if method == "TM_CCOEFF":
-            all_points = sorted(all_points, key=lambda x: -x[3])
-        elif method == "TM_CCOEFF_NORMED":
-            all_points = sorted(all_points, key=lambda x: -x[3])
-        elif method == "TM_CCORR":
-            all_points = sorted(all_points, key=lambda x: -x[3])
-        elif method == "TM_CCORR_NORMED":
-            all_points = sorted(all_points, key=lambda x: -x[3])
-        elif method == "TM_SQDIFF":
-            all_points = sorted(all_points, key=lambda x: x[3])
-        elif method == "TM_SQDIFF_NORMED":
-            all_points = sorted(all_points, key=lambda x: x[3])
+    def process_template(next_angle):
+        rotated_template, actual_scale = scale_image(
+            template_gray, next_angle, image_maxwh
+        )
+        rotated_maskmaker, actual_scale = scale_image(
+            maskmaker, next_angle, image_maxwh
+        )
+        matched_points = cv2.matchTemplate(
+            img_gray, rotated_template, cv2.TM_CCOEFF_NORMED, mask=rotated_maskmaker
+        )
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(matched_points)
+        if max_val >= matched_thresh:
+            return [max_loc, actual_scale[1], actual_scale[0], max_val]
+        return None
+
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        tasks = [
+            executor.submit(process_template, next_angle) for next_angle in scale_tuple
+        ]
+        all_points = [result for future in tasks if (result := future.result())]
+        print(result)
+    if method == "TM_CCOEFF":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_CCOEFF_NORMED":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_CCORR":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_CCORR_NORMED":
+        all_points = sorted(all_points, key=lambda x: -x[3])
+    elif method == "TM_SQDIFF":
+        all_points = sorted(all_points, key=lambda x: x[3])
+    elif method == "TM_SQDIFF_NORMED":
+        all_points = sorted(all_points, key=lambda x: x[3])
 
     if rm_redundant == True:
         lone_points_list = []
