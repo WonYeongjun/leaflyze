@@ -57,11 +57,10 @@ def invariant_match_template(
         # 이미지 스케일링 및 회전
         processed_template = scale_image(template_gray, scale_and_angle)
         # 템플릿 매칭 (결과는 2차원 numpy 배열)
-        result = cv2.matchTemplate(img_gray, processed_template, cv2.TM_CCOEFF_NORMED)
+        result = cv2.matchTemplate(img_gray, processed_template, cv2.TM_CCORR_NORMED)
 
         # numpy 벡터화 연산을 사용해서 조건을 만족하는 인덱스들을 한 번에 추출
-        print(1)
-        ys, xs = np.where(result >= matched_thresh)
+        ys, xs = np.where(result >= 0.98)
         matches = []
         # 추출된 좌표와 점수를 list comprehension으로 matches 리스트에 저장
         matches = [
@@ -73,7 +72,7 @@ def invariant_match_template(
             )
             for y, x in zip(ys, xs)
         ]
-        print(matches)
+        print(scale_and_angle)
         return matches
 
     # ThreadPoolExecutor를 이용한 병렬 처리
