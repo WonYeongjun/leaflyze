@@ -1,12 +1,22 @@
-#사진 촬영(어둡게 촬영)
+#사진 촬영
 import subprocess
+LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"
 
 # 사진 촬영 (노출, 감도 조절 추가)
-subprocess.run([
-    "libcamera-jpeg", "-o", "/home/userk/cal_img/raw/raw_img.jpg",
-    "--width", "7680", "--height", "5760",
-    "--shutter", "5000",  # 셔터 속도 (마이크로초 단위, 값이 작을수록 어두워짐)
-    "--gain", "1"         # 감도 (ISO와 유사, 값이 작을수록 어두워짐)
-])
+subprocess.run(
+    [
+        "libcamera-jpeg",
+        "-o",
+        LOCAL_FILE,
+        "--width",
+        "4608",
+        "--height",
+        "2592",
+        "--shutter",
+        "5000",
+        "--gain",
+        "15",
+    ]
+)
 
 print("사진 촬영 완료")

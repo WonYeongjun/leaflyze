@@ -1,3 +1,4 @@
+#사진찍고 전송 후 보정
 import RPi.GPIO as GPIO
 import time
 import subprocess

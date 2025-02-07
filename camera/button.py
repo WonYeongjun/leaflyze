@@ -1,3 +1,4 @@
+#사진 찍고 전송
 import RPi.GPIO as GPIO
 import time
 import subprocess
@@ -78,7 +79,7 @@ def send_file_to_windows():
             #     print(stderr.readline().strip())
 
         ssh.close()
-        print("🚀 Windows에서 perspective_win.py 실행 완료!")
+        #print("🚀 Windows에서 실행 완료!")
 
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
