@@ -7,7 +7,7 @@ import paramiko
 BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 
 # Windows PC의 SSH 정보
-HOST = "192.168.143.60"  # Windows PC의 IP 주소
+HOST = "192.168.0.2"  # Windows PC의 IP 주소
 PORT = 22  # SSH 포트 (기본: 22)
 USERNAME = "USERK"  # Windows 계정 이름
 PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
