@@ -12,7 +12,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./exm/glass/NewPink.jpg")
+    img_bgr = cv2.imread("./exm/glass/white_15.jpg")
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -29,17 +29,7 @@ if __name__ == "__main__":
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
-
-    # img_rgb = cv2.cvtColor(cv2.Canny(img_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
-    # template_rgb = cv2.cvtColor(cv2.Canny(template_rgb, 240, 240), cv2.COLOR_GRAY2RGB)
-    # canny = cv2.Canny(template_rgb, 240, 240)
-
-    # cropped_template_rgb = template_crop(template_rgb)
-
     height, width = template_gray.shape
-    # fig = plt.figure(num="Template - Close the Window to Continue >>>")
-    # plt.imshow(cropped_template_rgb)
-    # plt.show()
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
     ax1.imshow(im, cmap="gray")
@@ -193,19 +183,5 @@ if __name__ == "__main__":
         ax2.add_patch(rect)
         plt.scatter(center_x, center_y, s=50, color="blue")
         plt.show()
-    # fig2, ax2 = plt.subplots(1)
-    # plt.gcf().canvas.manager.set_window_title("Template Matching Results: Centers")
-    # ax2.imshow(img_rgb)
-    # for point_info in centers_list:
-    #     point = point_info[0]
-    #     scale = point_info[1]
-    #     plt.scatter(
-    #         point[0] + width / 2 * scale / 100,
-    #         point[1] + height / 2 * scale / 100,
-    #         s=20,
-    #         color="red",
-    #     )
-    # plt.show()
-    # 걸린 시간 계산
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time} 초")
