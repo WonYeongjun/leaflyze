@@ -81,21 +81,21 @@ if __name__ == "__main__":
         )
         centers_list.append([point, scale])
         plt.scatter(
-            point[0] + (width / 2) * scale / 100,
-            point[1] + (height / 2) * scale / 100,
+            point[0] + (width / 2) * scale[0] / 100,
+            point[1] + (height / 2) * scale[1] / 100,
             s=20,
             color="red",
         )
         idx = (
-            point[0] + (width / 2) * scale / 100,
-            point[1] + (height / 2) * scale / 100,
+            point[0] + (width / 2) * scale[0] / 100,
+            point[1] + (height / 2) * scale[1] / 100,
         )
         real_point.append([idx])
         plt.scatter(point[0], point[1], s=20, color="green")
         rectangle = patches.Rectangle(
             (point[0], point[1]),
-            width * scale / 100,
-            height * scale / 100,
+            width * scale[0] / 100,
+            height * scale[1] / 100,
             color="red",
             alpha=0.50,
             label="Matched box",
@@ -111,8 +111,8 @@ if __name__ == "__main__":
 
         transform = (
             mpl.transforms.Affine2D().rotate_deg_around(
-                point[0] + width / 2 * scale / 100,
-                point[1] + height / 2 * scale / 100,
+                point[0] + width / 2 * scale[0] / 100,
+                point[1] + height / 2 * scale[1] / 100,
                 angle,
             )
             + ax.transData
