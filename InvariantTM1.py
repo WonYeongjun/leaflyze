@@ -140,17 +140,17 @@ def invariant_match_template(
         )
         print(len(all_points))
     if method == "TM_CCOEFF":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCOEFF_NORMED":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCORR":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCORR_NORMED":
-        all_points = sorted(all_points, key=lambda x: -x[1])
+        all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_SQDIFF":
-        all_points = sorted(all_points, key=lambda x: x[1])
+        all_points = sorted(all_points, key=lambda x: x[3])
     elif method == "TM_SQDIFF_NORMED":
-        all_points = sorted(all_points, key=lambda x: x[1])
+        all_points = sorted(all_points, key=lambda x: x[3])
 
     def filter_redundant_points(points_chunk):
         # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
