@@ -12,7 +12,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./exm/glass/NewPink.jpg")
+    img_bgr = cv2.imread("./exm/glass/white/fin_cal_img_20250207_132447.jpg")
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -21,11 +21,11 @@ if __name__ == "__main__":
     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     # 실제 이미지 이진화
     im = img_gray
-    img_gray = np.where(
-        img_gray > threshold,
-        np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
-        np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
-    )
+    # img_gray = np.where(
+    #     img_gray > threshold,
+    #     np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
+    #     np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
+    # )
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
@@ -41,7 +41,7 @@ if __name__ == "__main__":
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.9,
+        matched_thresh=0.4,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
