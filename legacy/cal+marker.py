@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 import random
-from InvariantTM2 import invariant_match_template  # ,template_crop
+from template_func_proportion_change import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
