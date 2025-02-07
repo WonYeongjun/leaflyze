@@ -82,8 +82,7 @@ if __name__ == "__main__":
     # test_image_path = "C:\\Users\\UserK\\Desktop\\raw\\rawraw.jpg"  # 원본 이미지 경로
 
     img_bgr = correct_perspective(test_image_path)
-    # plt.imshow(img_bgr)
-    # plt.show()
+
     threshold = 130
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -102,17 +101,17 @@ if __name__ == "__main__":
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
     height, width = template_gray.shape
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-    ax1.imshow(im, cmap="gray")
-    ax1.set_title("Original Grayscale Image")
-    ax2.imshow(img_gray, cmap="gray")
-    ax2.set_title("Processed Grayscale Image")
-    plt.show()
+    # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    # ax1.imshow(im, cmap="gray")
+    # ax1.set_title("Original Grayscale Image")
+    # ax2.imshow(img_gray, cmap="gray")
+    # ax2.set_title("Processed Grayscale Image")
+    # plt.show()
     points_list = invariant_match_template(
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.4,
+        matched_thresh=0.35,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
