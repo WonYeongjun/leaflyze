@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 
-from InvariantTM_mask import invariant_match_template  # ,template_crop
+from template_func_mask import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
