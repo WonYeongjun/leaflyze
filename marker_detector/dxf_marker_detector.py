@@ -93,119 +93,88 @@ if __name__ == "__main__":
         )
         for y, x in zip(ys, xs)
     ]
-all_points = sorted(matches, key=lambda x: -x[3])
-from concurrent.futures import ThreadPoolExecutor
+    all_points = sorted(matches, key=lambda x: -x[3])
 
-chunk_size = max(1, len(all_points) // 4)  # 스레드당 할당할 포인트 개수
-chunks = [all_points[i : i + chunk_size] for i in range(0, len(all_points), chunk_size)]
-
-
-def filter_redundant_points(points_chunk):
-    # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
     lone_points_list = []
     visited_points_list = []
-
-    for point_info in points_chunk:
+    for point_info in all_points:
+        print(point_info)
         point = point_info[0]
-        scale = point_info[2]
+        scalex = point_info[2][0]
+        scaley = point_info[2][1]
         all_visited_points_not_close = True
-
-        for visited_point in visited_points_list:
-            if (abs(visited_point[0] - point[0]) < (width * scale[0] / 100)) and (
-                abs(visited_point[1] - point[1]) < (height * scale[1] / 100)
-            ):
-                all_visited_points_not_close = False
-                break  # 이미 가까운 점이 있으면 더 체크할 필요 없음
-
-        if all_visited_points_not_close:
+        if len(visited_points_list) != 0:
+            for visited_point in visited_points_list:
+                if (abs(visited_point[0] - point[0]) < (width * scalex / 100)) and (
+                    abs(visited_point[1] - point[1]) < (height * scaley / 100)
+                ):
+                    all_visited_points_not_close = False
+            if all_visited_points_not_close == True:
+                lone_points_list.append(point_info)
+                visited_points_list.append(point)
+        else:
             lone_points_list.append(point_info)
             visited_points_list.append(point)
+    points_list = lone_points_list
 
-    return lone_points_list
+    print("중복 지점 제거 완료")
 
-
-with ThreadPoolExecutor() as executor2:
-    results = executor2.map(filter_redundant_points, chunks)
-
-# 여러 스레드 결과를 합치면서 최종 중복 제거
-final_lone_points = []
-final_visited_points = []
-
-for lone_points in results:
-    for point_info in lone_points:
+    print(points_list)
+    fig, ax = plt.subplots(1)
+    plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
+    ax.imshow(img_rgb)
+    print(len(points_list))
+    centers_list = []
+    real_point = []
+    for point_info in points_list:
         point = point_info[0]
+        angle = point_info[1]
         scale = point_info[2]
-        all_visited_points_not_close = True
-
-        for visited_point in final_visited_points:
-            if (abs(visited_point[0] - point[0]) < (width * scale[0] / 100)) and (
-                abs(visited_point[1] - point[1]) < (height * scale[1] / 100)
-            ):
-                all_visited_points_not_close = False
-                break
-
-        if all_visited_points_not_close:
-            final_lone_points.append(point_info)
-            final_visited_points.append(point)
-
-points_list = final_lone_points
-print("중복 지점 제거 완료")
-print(points_list)
-fig, ax = plt.subplots(1)
-plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
-ax.imshow(img_rgb)
-print(len(points_list))
-centers_list = []
-real_point = []
-for point_info in points_list:
-    point = point_info[0]
-    angle = point_info[1]
-    scale = point_info[2]
-    print(
-        f"No.{str(points_list.index(point_info))} matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[3]}"
-    )
-    centers_list.append([point, scale])
-    plt.scatter(
-        point[0] + (width / 2) * scale[0] / 100,
-        point[1] + (height / 2) * scale[1] / 100,
-        s=20,
-        color="red",
-    )
-    idx = (
-        point[0] + (width / 2) * scale[0] / 100,
-        point[1] + (height / 2) * scale[1] / 100,
-    )
-    real_point.append([idx])
-    plt.scatter(point[0], point[1], s=20, color="green")
-    rectangle = patches.Rectangle(
-        (point[0], point[1]),
-        width * scale[0] / 100,
-        height * scale[1] / 100,
-        color="red",
-        alpha=0.50,
-        label="Matched box",
-    )
-    plt.text(
-        point[0],
-        point[1] - 10,
-        str(points_list.index(point_info)),
-        color="blue",
-        fontsize=12,
-        weight="bold",
-    )
-
-    transform = (
-        mpl.transforms.Affine2D().rotate_deg_around(
-            point[0] + width / 2 * scale[0] / 100,
-            point[1] + height / 2 * scale[1] / 100,
-            angle,
+        print(
+            f"No.{str(points_list.index(point_info))} matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[3]}"
         )
-        + ax.transData
-    )
-    rectangle.set_transform(transform)
-    ax.add_patch(rectangle)
-    plt.legend(handles=[rectangle])
-end_time = time.time()
-elapsed_time = end_time - start_time
-print(f"작업에 걸린 시간: {elapsed_time} 초")
-plt.show()
+        centers_list.append([point, scale])
+        plt.scatter(
+            point[0] + (width / 2) * scale[0] / 100,
+            point[1] + (height / 2) * scale[1] / 100,
+            s=20,
+            color="red",
+        )
+        idx = (
+            point[0] + (width / 2) * scale[0] / 100,
+            point[1] + (height / 2) * scale[1] / 100,
+        )
+        real_point.append([idx])
+        plt.scatter(point[0], point[1], s=20, color="green")
+        rectangle = patches.Rectangle(
+            (point[0], point[1]),
+            width * scale[0] / 100,
+            height * scale[1] / 100,
+            color="red",
+            alpha=0.50,
+            label="Matched box",
+        )
+        plt.text(
+            point[0],
+            point[1] - 10,
+            str(points_list.index(point_info)),
+            color="blue",
+            fontsize=12,
+            weight="bold",
+        )
+
+        transform = (
+            mpl.transforms.Affine2D().rotate_deg_around(
+                point[0] + width / 2 * scale[0] / 100,
+                point[1] + height / 2 * scale[1] / 100,
+                angle,
+            )
+            + ax.transData
+        )
+        rectangle.set_transform(transform)
+        ax.add_patch(rectangle)
+        plt.legend(handles=[rectangle])
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"작업에 걸린 시간: {elapsed_time} 초")
+    plt.show()
