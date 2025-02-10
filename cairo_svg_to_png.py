@@ -2,7 +2,7 @@ import cairo
 from svgpathtools import svg2paths
 
 # SVG 파일 경로
-svg_file = "example.svg"
+svg_file = "C:/Users/UserK/Desktop/new/glass_white.svg"
 
 # SVG 파일에서 경로 추출
 paths, attributes = svg2paths(svg_file)
@@ -38,4 +38,4 @@ for path in paths:
         context.stroke()
 
 # 이미지 저장
-surface.write_to_png("output_image.png")
+surface.write_to_png("C:/Users/UserK/Desktop/new/glass_white.png")
