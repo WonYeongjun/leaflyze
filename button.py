@@ -1,4 +1,4 @@
-#사진 찍고 전송
+# 사진 찍고 전송
 import RPi.GPIO as GPIO
 import time
 import subprocess
@@ -9,7 +9,7 @@ BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 
 # Windows PC의 SSH 정보
 HOST = "192.168.0.2"  # Windows PC의 IP 주소
-#HOST = "172.30.1.42" # 영준 IP
+# HOST = "172.30.1.42" # 영준 IP
 PORT = 22  # SSH 포트 (기본: 22)
 USERNAME = "USERK"  # Windows 계정 이름
 PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
@@ -60,26 +60,7 @@ def send_file_to_windows():
 
         print("✅ 파일 전송 완료!")
 
-        # Windows에서 perspective_win.py 실행
-
-        # command = 'cmd /c "C:/Users/UserK/Desktop/run_script.bat"'
-        # stdin,stdout,stderr=ssh.exec_command(command)
-
-        # print("실행 시작")
-
-        # 입력이 필요한 경우 자동 입력 (필요한 경우 수정 가능)
-        # stdin.write("your_input_value\n")
-        # stdin.flush()
-
-        # 실행 결과 실시간 출력
-        # while not stdout.channel.exit_status_ready():
-            # if stdout.channel.recv_ready():
-            #     print(stdout.readline().strip())
-            # if stderr.channel.recv_ready():
-            #     print(stderr.readline().strip())
-
         ssh.close()
-        #print("🚀 Windows에서 실행 완료!")
 
     except Exception as e:
         print(f"❌ 오류 발생: {e}")
