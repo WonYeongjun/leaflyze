@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
 import random
-from template_func_not_only1 import invariant_match_template  # ,template_crop
+from calibration_marker_func import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
@@ -89,24 +89,10 @@ if __name__ == "__main__":
         template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)
     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    # 실제 이미지 이진화
-    im = img_gray
-    # img_gray = np.where(
-    #     img_gray > threshold,
-    #     np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
-    #     np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
-    # )
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
     height, width = template_gray.shape
-
-    # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-    # ax1.imshow(im, cmap="gray")
-    # ax1.set_title("Original Grayscale Image")
-    # ax2.imshow(img_gray, cmap="gray")
-    # ax2.set_title("Processed Grayscale Image")
-    # plt.show()
     points_list = invariant_match_template(
         grayimage=img_gray,
         graytemplate=template_gray,
