@@ -11,11 +11,12 @@ BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 HOST = "172.30.1.98"  # Windows PC의 IP 주소
 PORT = 22  # SSH 포트 (기본: 22)
 USERNAME = "USERK"  # Windows 계정 이름
-PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
+PASSWORD = "1234"  # Windows 비밀번호
 
 # 파일 경로 설정
-LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"  # 라즈베리파이의 촬영 파일 위치
+LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"  # 라즈베리파이의 촬영 사진 저장 경로
 REMOTE_PATH = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # Windows 저장 경로
+SCRIPT_PATH = "C:/Users/UserK/Desktop/perspective_win.py" #Windows에서 실행할 파일 경로
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -48,8 +49,8 @@ def send_file_to_windows():
 
         print("✅ 파일 전송 완료!")
 
-        # Windows에서 perspective_win.py 실행
-        command = 'python "C:/Users/UserK/Desktop/perspective_win.py"'
+        # Windows에서 파일 실행
+        command = f'python "{SCRIPT_PATH}"'#원근감 보정 코드
         stdin, stdout, stderr = ssh.exec_command(command)
 
         # 실행 결과 출력
