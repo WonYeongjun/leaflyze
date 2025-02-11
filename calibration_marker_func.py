@@ -54,15 +54,14 @@ def invariant_match_template(
     from concurrent.futures import ThreadPoolExecutor
 
     def process_template(scale_and_angle):
-        # 이미지 스케일링 및 회전
+
         processed_template = scale_image(template_gray, scale_and_angle)
-        # 템플릿 매칭 (결과는 2차원 numpy 배열)
+
         result = cv2.matchTemplate(img_gray, processed_template, cv2.TM_CCOEFF_NORMED)
 
-        # numpy 벡터화 연산을 사용해서 조건을 만족하는 인덱스들을 한 번에 추출
         ys, xs = np.where(result >= matched_thresh)
         matches = []
-        # 추출된 좌표와 점수를 list comprehension으로 matches 리스트에 저장
+
         matches = [
             (
                 (int(x), int(y)),
@@ -72,10 +71,9 @@ def invariant_match_template(
             )
             for y, x in zip(ys, xs)
         ]
-        # print(scale_and_angle)
+
         return matches
 
-    # ThreadPoolExecutor를 이용한 병렬 처리
     with ThreadPoolExecutor() as executor:
         tasks = [
             executor.submit(process_template, scale_and_angle)
@@ -86,7 +84,7 @@ def invariant_match_template(
                 future.result() for future in tasks if future.result()
             )
         )
-        print(len(all_points))
+
     if method == "TM_CCOEFF":
         all_points = sorted(all_points, key=lambda x: -x[3])
     elif method == "TM_CCOEFF_NORMED":
@@ -103,7 +101,7 @@ def invariant_match_template(
     print("중복 지점 제거 시작")
 
     def filter_redundant_points(points_chunk):
-        # """중복된 포인트를 제거하는 함수 (각 스레드에서 독립적으로 실행)"""
+
         lone_points_list = []
         visited_points_list = []
 
@@ -117,7 +115,7 @@ def invariant_match_template(
                     abs(visited_point[1] - point[1]) < (height * scale[1] / 100)
                 ):
                     all_visited_points_not_close = False
-                    break  # 이미 가까운 점이 있으면 더 체크할 필요 없음
+                    break
 
             if all_visited_points_not_close:
                 lone_points_list.append(point_info)
@@ -126,7 +124,7 @@ def invariant_match_template(
         return lone_points_list
 
     if rm_redundant:
-        chunk_size = max(1, len(all_points) // 4)  # 스레드당 할당할 포인트 개수
+        chunk_size = max(1, len(all_points) // 4)
         chunks = [
             all_points[i : i + chunk_size]
             for i in range(0, len(all_points), chunk_size)
@@ -135,7 +133,6 @@ def invariant_match_template(
         with ThreadPoolExecutor() as executor2:
             results = executor2.map(filter_redundant_points, chunks)
 
-        # 여러 스레드 결과를 합치면서 최종 중복 제거
         final_lone_points = []
         final_visited_points = []
 
