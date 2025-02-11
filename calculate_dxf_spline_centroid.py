@@ -14,7 +14,6 @@ def draw_centroid_circle(dxf_path, output_path):
         print("SPLINE 객체가 없습니다.")
         return
 
-    # 무게중심을 계산하고 동그라미 추가하기
     for spline in splines:
         if spline.closed:
             # 제어점 (Control Points) 출력 및 평균 계산
