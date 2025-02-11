@@ -12,9 +12,9 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./exm/glass/pink/fin_cal_img_20250207_141129.jpg")
+    img_bgr = cv2.imread("C:/Users/UserK/Documents/GitHub/leaflyze/image/exm/glass/white/fin_cal_img_20250207_132715.jpg")
 
-    template_bgr = plt.imread("./image/marker_ideal.jpg")
+    template_bgr = plt.imread("C:/Users/UserK/Desktop/marker_ideal.jpg")
     template_bgr = cv2.resize(
         template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)

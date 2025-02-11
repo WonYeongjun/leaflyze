@@ -20,7 +20,7 @@ def transform_point(x, y):
 
 
 # 테스트할 점 (왜곡된 사각형 내부의 점)
-test_points = [(50, 25), (30, 10), (80, 40)]
+test_points = [(50, 25)]
 
 # 변환된 점 계산
 transformed_points = [transform_point(x, y) for x, y in test_points]
@@ -40,9 +40,8 @@ plt.plot(distorted_polygon[:, 0], distorted_polygon[:, 1], "ro-", label="왜곡�
 for (dx, dy), (sx, sy) in zip(test_points, transformed_points):
     plt.plot(dx, dy, "ro")  # 왜곡된 사각형 내의 점
     plt.plot(sx, sy, "bo")  # 변환된 직사각형 필드 내의 점
-    plt.arrow(
-        dx, dy, sx - dx, sy - dy, head_width=2, head_length=3, fc="gray", ec="gray"
-    )
+    plt.arrow(sx, sy, dx - sx, dy - sy, head_width=2, head_length=3, fc='gray', ec='gray')
+
 
 # 축 설정
 plt.xlim(-10, 120)
@@ -50,8 +49,8 @@ plt.ylim(-10, 60)
 plt.gca().invert_yaxis()  # 이미지 좌표계처럼 y축 방향 반전
 
 plt.legend()
-plt.title("투시 변환을 통한 좌표 매핑")
-plt.xlabel("X 좌표")
-plt.ylabel("Y 좌표")
+plt.title("mapping")
+plt.xlabel("X")
+plt.ylabel("Y")
 plt.grid(True)
 plt.show()

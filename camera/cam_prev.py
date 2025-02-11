@@ -1,3 +1,4 @@
+
 from picamzero import Camera
 
 cam = Camera()
