@@ -1,4 +1,4 @@
-# 사진 찍고 전송
+# 버튼 누르면 사진 찍고 pc로 전송
 import RPi.GPIO as GPIO
 import time
 import subprocess
@@ -9,7 +9,6 @@ BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
 
 # Windows PC의 SSH 정보
 HOST = "192.168.0.2"  # Windows PC의 IP 주소
-# HOST = "172.30.1.42" # 영준 IP
 PORT = 22  # SSH 포트 (기본: 22)
 USERNAME = "USERK"  # Windows 계정 이름
 PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
