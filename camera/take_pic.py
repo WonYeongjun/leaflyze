@@ -1,8 +1,8 @@
 #사진 촬영
 import subprocess
-LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"
+LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"#사진 저장 위치
 
-# 사진 촬영 (노출, 감도 조절 추가)
+# 사진 촬영
 subprocess.run(
     [
         "libcamera-jpeg",
