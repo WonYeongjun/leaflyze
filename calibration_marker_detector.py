@@ -1,4 +1,3 @@
-# 저장된 이미지를 가져와서 원근법 보정함
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,66 +7,52 @@ import random
 from calibration_marker_func import invariant_match_template  # ,template_crop
 import time
 
-# 시작 시간 기록
 start_time = time.time()
 
 
-# 원근 보정 함수
 def correct_perspective(image_path):
-    # 이미지 로드
+
     image = cv2.imread(image_path)
     if image is None:
         print(f"Error: Cannot load image at {image_path}")
         return
 
-    # 이미지 크기 및 중심 계산
     h, w, _ = image.shape
     image_center = np.array([w / 2, h / 2])
 
-    # 그레이스케일 변환
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # 아루코 마커 검출
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
     parameters = cv2.aruco.DetectorParameters()
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
     corners, ids, _ = detector.detectMarkers(gray)
 
-    # 원하는 마커 ID 순서
     desired_ids = [12, 18, 27, 5]
 
     if ids is not None:
         marker_points = []
 
-        # 검출된 마커에서 원하는 ID 찾기
         for marker_id in desired_ids:
             for i, detected_id in enumerate(ids):
                 if detected_id[0] == marker_id:
-                    marker_corners = corners[i][0]  # 4개의 꼭짓점 좌표
-                    # 이미지 중심과 가장 가까운 꼭짓점 선택
+                    marker_corners = corners[i][0]
                     closest_corner = min(
                         marker_corners, key=lambda pt: np.linalg.norm(pt - image_center)
                     )
                     marker_points.append(closest_corner)
                     break
 
-        # 모든 마커가 감지된 경우 원근 변환 수행
         if len(marker_points) == 4:
             pts1 = np.array(marker_points, dtype="float32")
-            print(f"pts1 (selected marker corners): {pts1}")
-
-            # 변환 후 기준이 될 좌표
             width, height = 4200, 2970
             pts2 = np.array(
                 [[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]],
                 dtype="float32",
             )
 
-            # 호모그래피 행렬 계산
             matrix, _ = cv2.findHomography(pts1, pts2)
 
-            # 원근 변환 적용
             dst = cv2.warpPerspective(image, matrix, (width, height))
         else:
             print("Not enough markers detected to calculate perspective.")
@@ -78,8 +63,7 @@ def correct_perspective(image_path):
 
 
 if __name__ == "__main__":
-    test_image_path = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # 원본 이미지 경로
-    # test_image_path = "C:\\Users\\UserK\\Desktop\\raw\\rawraw.jpg"  # 원본 이미지 경로
+    test_image_path = "C:/Users/UserK/Desktop/raw/raw_img.jpg"
 
     img_bgr = correct_perspective(test_image_path)
 
@@ -159,7 +143,7 @@ if __name__ == "__main__":
         rectangle.set_transform(transform)
         ax.add_patch(rectangle)
         plt.legend(handles=[rectangle])
-    # plt.grid(True)
+
     end_time = time.time()
     plt.show()
 
@@ -176,12 +160,10 @@ if __name__ == "__main__":
 
         # 좌표를 오른쪽 위, 왼쪽 위, 왼쪽 아래, 오른쪽 아래 순서로 정렬
         def sort_points(points):
-            points = sorted(points, key=lambda x: x[0])  # x 좌표 기준으로 정렬
+            points = sorted(points, key=lambda x: x[0])
             left_points = points[:2]
             right_points = points[2:]
-            left_points = sorted(
-                left_points, key=lambda x: x[1]
-            )  # y 좌표 기준으로 정렬
+            left_points = sorted(left_points, key=lambda x: x[1])
             right_points = sorted(right_points, key=lambda x: x[1])
             return [right_points[1], left_points[1], left_points[0], right_points[0]]
 
@@ -189,16 +171,13 @@ if __name__ == "__main__":
         print("정렬된 좌표 행렬:")
         print(sorted_matrix)
 
-        # 중심 좌표 계산
         center_x = sum(point[0] for point in sorted_matrix) / 4
         center_y = sum(point[1] for point in sorted_matrix) / 4
         print(f"중심 좌표:({center_x}, {center_y})")
 
-        # 회전 각도 계산
         def calculate_angle(p1, p2):
             return np.degrees(np.arctan2(p2[1] - p1[1], p2[0] - p1[0]))
 
-        # 오른쪽 위와 왼쪽 위 점을 이용하여 각도 계산
         angle01 = calculate_angle(sorted_matrix[1], sorted_matrix[0])
         angle23 = calculate_angle(sorted_matrix[2], sorted_matrix[3])
         if angle01 > 90:
@@ -222,7 +201,6 @@ if __name__ == "__main__":
         angle = ((90 - angle_vertical) + angle_horizontal) / 2
         print("직사각형의 회전 각도:", angle)
 
-        # 사각형 그리기
         fig2, ax2 = plt.subplots(1)
         plt.gcf().canvas.manager.set_window_title("Selected Rectangle")
         ax2.imshow(img_rgb)
