@@ -1,4 +1,4 @@
-# 사진 찍고 전송
+# 버튼 누르면 사진 찍고 pc로 전송
 import RPi.GPIO as GPIO
 import time
 import subprocess
