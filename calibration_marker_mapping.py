@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
-import random
 from calibration_marker_func import invariant_match_template  # ,template_crop
 import ezdxf
 from matplotlib.patches import Polygon
