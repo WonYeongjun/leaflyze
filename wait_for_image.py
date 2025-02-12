@@ -20,6 +20,7 @@ class ImageFileEventHandler(FileSystemEventHandler):
             # 파일 크기가 안정될 때까지 대기 (최대 2.5초)
             for _ in range(5):
                 new_size = os.path.getsize(event.src_path)
+                print(_)
                 if new_size == file_size:
                     break  # 크기가 변하지 않으면 저장 완료로 간주
                 file_size = new_size
