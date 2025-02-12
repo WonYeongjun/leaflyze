@@ -5,7 +5,7 @@
 2. config의 IP주소를 pc의 ip 주소로 바꾼다.
 3. pc가 부팅하자마자 ssh 서버를 열도록 설정한다. (windows+R > services.msc > Open SSH server 더블 클릭 > 시작 유형 자동)
 * Open SSH server가 없으면 설정 > 시스템 > 선택적 기능 > 기능 추가 > 검색해서 추가
-4. putty 실행 (구글에서 검색해서 다운) > session에서 라즈베리파이의 ip주소 입력 > 실행하면 userk 입력, 1234 입력 
+4. putty 실행 (구글에서 검색해서 다운) > session에서 라즈베리파이의 ip주소 입력 > 실행하면 userk 입력, 1234 입력 > export DISPLAY=:0 를 입력
 5. ArUco마커가 있는 직사각형의 가로와 세로의 길이를 실제로 재서 config의 width, height = 4200, 2970의 수치를 바꿔준다. 하단의 config.json 설명 참조
 6. pc에 C:/Users/UserK/Desktop/raw/로 폴더를 만들어놓는다.
 7. 코드를 한 번 실행해보는데(방법은 밑에서 설명) 그때 잘 찾은 마커의 결과에서 scale을 확인해서 100미만이면 calmarker_new의 아래의 부분에서 fx와 fy를 줄이고, 반대로 100이상이면 키운다.
