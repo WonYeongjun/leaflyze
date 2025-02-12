@@ -62,7 +62,7 @@ def correct_perspective(image_path):
 
 
 if __name__ == "__main__":
-    test_image_path = "C:/Users/UserK/Desktop/raw/raw_img.jpg"
+    test_image_path = "C:/Users/UserK/Desktop/raw/raw.jpg"
 
     img_bgr = correct_perspective(test_image_path)
 

@@ -18,11 +18,8 @@ class ImageFileEventHandler(FileSystemEventHandler):
             if is_running:
                 return
 
-            if not event.is_directory and event.src_path.lower().endswith(
-                (".jpg", ".jpeg", ".png", ".gif")
-            ):
+            if event.src_path.lower().endswith((".jpg", ".jpeg", ".png", ".gif")):
                 time.sleep(0.5)  # 파일 저장이 완료되도록 대기
-
                 current_time = time.time()
                 if (
                     event.src_path in last_executed
