@@ -17,3 +17,33 @@ template_bgr = cv2.resize(
 3. 라즈베리파이에서는 button.py를 실행시킨다.
 4. 라즈베리파이에 있는 버튼을 누른다.
 5. 기다리다가 컴퓨터에서 수많은 직사각형이 있는 이미지가 나올텐데, 그 중에 마커를 정확하게 가린 이미지의 인덱스를 4개 입력한다.
+
+config.json 설명
+{
+  "username": "userk",//pc 사용자 이름
+
+  "passward": "1234",//pc 비밀번호
+
+  "ip_address": "192.168.1.100",//pc의 ip주소
+
+  "raspi_file_path": "/home/userk/cal_img/raw/raw_img.jpg",//라즈베리파이 내부 사진 저장 위치
+
+  "pc_file_path": "C:/Users/UserK/Desktop/raw/raw_img.jpg",//pc 내부 원본사진 저장 위치
+
+  "pc_modified_file_path": "C:/Users/UserK/Desktop/fin/fin_img.jpg",//pc 내부 보정된 사진 저장 위치
+
+  "ArUco_list": [12, 18, 27, 5],//ArUco 마커는 좌상단 우상단 우하단 좌하단 에 12, 18, 27, 5 순으로 배치(4x4크기의 마커)
+
+  "ArUco_width": 4200, //(좌상단 마커의 우하단 꼭짓점 좌표와 우상단 마커의 좌하단 꼭짓점 좌표 사이의 거리)*n 직접 측정 후 기입
+
+  "ArUco_height": 2970,//(좌상단 마커의 우하단 꼭짓점 좌표와 좌하단 마커의 우상단 꼭짓점 좌표 사이의 거리)*n 직접 측정 후 기입
+
+  "matrix_coef": [
+    [1.90296778e+03, 0.00000000e+00, 9.62538876e+02],
+    [0.00000000e+00, 1.90259449e+03, 6.99587164e+02],
+    [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+  ],//chessboard.py로 구한 mtx
+  
+  "dist_coeffs": [-0.00159553,  0.25363958, -0.00156397,  0.00185892, -0.41956662]//chessboard.py로 구한 dist
+
+}
