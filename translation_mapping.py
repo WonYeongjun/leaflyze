@@ -41,7 +41,9 @@ plt.plot(distorted_polygon[:, 0], distorted_polygon[:, 1], "ro-", label="왜곡�
 for (dx, dy), (sx, sy) in zip(test_points, transformed_points):
     plt.plot(dx, dy, "ro")  # 왜곡된 사각형 내의 점
     plt.plot(sx, sy, "bo")  # 변환된 직사각형 필드 내의 점
-    plt.arrow(sx, sy, dx - sx, dy - sy, head_width=2, head_length=3, fc='gray', ec='gray')
+    plt.arrow(
+        sx, sy, dx - sx, dy - sy, head_width=2, head_length=3, fc="gray", ec="gray"
+    )
 
 
 # 축 설정
