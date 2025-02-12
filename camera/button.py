@@ -39,7 +39,7 @@ def capture_photo():
             "15",
         ]
     )
-    print("✅ 사진 촬영 완료!")
+    print("사진 촬영 완료!")
 
     # Windows로 파일 전송 및 실행
     send_file_to_windows()
