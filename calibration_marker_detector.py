@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
-import random
 from calibration_marker_func import invariant_match_template  # ,template_crop
 import time
 
@@ -68,7 +67,7 @@ if __name__ == "__main__":
     img_bgr = correct_perspective(test_image_path)
 
     threshold = 130
-    template_bgr = plt.imread("./image/marker_ideal.jpg")
+    template_bgr = plt.imread("C:/Users/UserK/Desktop/image/marker_ideal.jpg")
     template_bgr = cv2.resize(
         template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)
