@@ -42,7 +42,7 @@ class ImageFileEventHandler(FileSystemEventHandler):
     def run_subprocess(self, src_path):
         global is_running
         script_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "calibration_marker_detector.py"
+            os.path.dirname(os.path.abspath(__file__)), config["main_code_name"]
         )
         subprocess.run(["python", script_path, src_path])
         with lock:
