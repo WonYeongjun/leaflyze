@@ -3,8 +3,12 @@
 import cv2
 import numpy as np
 import json
+import os
 
-with open("config.json", "r") as f:
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+with open(CONFIG_PATH, "r", encoding="utf-8") as f:
     config = json.load(f)
 
 def undistort_image(image_path, camera_matrix, dist_coeffs, target_size=(640*3, 480*3)):

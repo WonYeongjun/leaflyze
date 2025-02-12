@@ -2,8 +2,12 @@
 import cv2
 import numpy as np
 import json
+import os
 
-with open("config.json", "r") as f:
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+
+with open(CONFIG_PATH, "r", encoding="utf-8") as f:
     config = json.load(f)
 
 def correct_perspective(image_path, output_path):
