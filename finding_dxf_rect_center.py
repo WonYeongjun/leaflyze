@@ -59,11 +59,11 @@ def remove_largest_rectangle(dxf_path):
         modelspace.add_circle(
             center=largest_center, radius=radius
         )  # 다각형 내부 영역의 중심
-        doc.saveas("updated_" + dxf_path)  # 변경된 파일 저장
+        doc.saveas("./image/updated_심포유강아지_생산_얼굴x12.dxf")  # 변경된 파일 저장
     else:
         print("직사각형을 찾을 수 없습니다.")
 
 
 # DXF 파일 경로 지정
-dxf_file = "심포유강아지_생산_얼굴x12.dxf"  # 예시 DXF 파일 경로
+dxf_file = "./image/심포유강아지_생산_얼굴x12.dxf"  # 예시 DXF 파일 경로
 remove_largest_rectangle(dxf_file)
