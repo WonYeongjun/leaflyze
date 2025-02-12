@@ -40,8 +40,8 @@ class ImageFileEventHandler(FileSystemEventHandler):
 if __name__ == "__main__":
     path_to_watch = r"C:/Users/UserK/Desktop/raw"  # 감시할 폴더 경로
 
-    event_handler = ImageFileEventHandler()
     observer = Observer()
+    event_handler = ImageFileEventHandler()
     observer.schedule(event_handler, path_to_watch, recursive=False)
     observer.start()
     print(f"{path_to_watch} 디렉토리를 감시 중입니다...")
