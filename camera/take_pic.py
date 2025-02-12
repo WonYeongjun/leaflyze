@@ -1,8 +1,11 @@
 #사진 촬영
 import subprocess
-LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"#사진 저장 위치
+import json
+with open("config.json", "r") as f:
+    config = json.load(f)
+    
+LOCAL_FILE = config["raspi_file_path"]
 
-# 사진 촬영
 subprocess.run(
     [
         "libcamera-jpeg",
