@@ -22,7 +22,7 @@ GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 def capture_photo():
-    """사진을 촬영하고 Windows로 전송 및 실행"""
+    """사진을 촬영하고 전송 및 실행"""
     print("📸 사진 촬영 중...")
     subprocess.run(
         [
@@ -39,7 +39,7 @@ def capture_photo():
             "15",
         ]
     )
-    print("✅ 사진 촬영 완료!")
+    print("사진 촬영 완료!")
 
     # Windows로 파일 전송 및 실행
     send_file_to_windows()
