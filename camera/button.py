@@ -4,18 +4,19 @@ import time
 import subprocess
 import threading
 import paramiko
+import json
 
-BUTTON_PIN = 17  # GPIO 17번 핀 (물리적 번호 11번)
+with open("config.json", "r") as f:
+    config = json.load(f)
 
-# Windows PC의 SSH 정보
-HOST = "192.168.0.2"  # Windows PC의 IP 주소
+BUTTON_PIN = 17
+
+HOST = config["ip_address"]
 PORT = 22  # SSH 포트 (기본: 22)
-USERNAME = "USERK"  # Windows 계정 이름
-PASSWORD = "1234"  # Windows 비밀번호 (보안상 SSH 키 인증 권장)
-
-# 파일 경로 설정
-LOCAL_FILE = "/home/userk/cal_img/raw/raw_img.jpg"  # 라즈베리파이의 촬영 파일 위치
-REMOTE_PATH = "C:/Users/UserK/Desktop/raw/raw_img.jpg"  # Windows 저장 경로
+USERNAME = config["username"]
+PASSWORD = config["passward"]
+LOCAL_FILE = config["raspi_file_path"]
+REMOTE_PATH = config["pc_file_path"]
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -41,7 +42,6 @@ def capture_photo():
     )
     print("사진 촬영 완료!")
 
-    # Windows로 파일 전송 및 실행
     send_file_to_windows()
 
 

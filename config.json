@@ -1,5 +1,17 @@
 {
   "username": "userk",
+  "passward": "1234",
   "ip_address": "192.168.1.100",
-  "file_path": "/home/pi/data/input.svg"
+  "raspi_file_path": "/home/userk/cal_img/raw/raw_img.jpg",
+  "pc_file_path": "C:/Users/UserK/Desktop/raw/raw_img.jpg",
+  "pc_modified_file_path": "C:/Users/UserK/Desktop/fin/fin_img.jpg",
+  "ArUco_list": [12, 18, 27, 5],
+  "ArUco_width": 4200,
+  "ArUco_height": 2970,
+  "matrix_coef": [
+    [1.90296778e+03, 0.00000000e+00, 9.62538876e+02],
+    [0.00000000e+00, 1.90259449e+03, 6.99587164e+02],
+    [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]
+  ],
+  "dist_coeffs": [-0.00159553, 0.25363958, -0.00156397, 0.00185892, -0.41956662]
 }
