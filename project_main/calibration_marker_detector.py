@@ -5,6 +5,13 @@ import matplotlib.patches as patches
 import matplotlib as mpl
 from calibration_marker_func import invariant_match_template  # ,template_crop
 import time
+import json
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+    config = json.load(f)
 
 start_time = time.time()
 
@@ -62,12 +69,13 @@ def correct_perspective(image_path):
 
 
 if __name__ == "__main__":
-    test_image_path = "C:/Users/UserK/Desktop/raw/raw.jpg"
+    test_image_path = config["pc_file_path"]
 
     img_bgr = correct_perspective(test_image_path)
 
     threshold = 130
-    template_bgr = plt.imread("C:/Users/UserK/Desktop/image/marker_ideal.jpg")
+    template_image_path = config["pc_marker_file_path"]
+    template_bgr = plt.imread(template_image_path)
     template_bgr = cv2.resize(
         template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)

@@ -3,12 +3,18 @@ import subprocess
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
-
+import json
+import os
 
 last_executed = {}
 EXECUTION_DELAY = 2
 is_running = False
 lock = threading.Lock()
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
+with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+    config = json.load(f)
 
 
 class ImageFileEventHandler(FileSystemEventHandler):
@@ -35,14 +41,17 @@ class ImageFileEventHandler(FileSystemEventHandler):
 
     def run_subprocess(self, src_path):
         global is_running
-        subprocess.run(["python", "calibration_marker_detector.py", src_path])
+        script_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "calibration_marker_detector.py"
+        )
+        subprocess.run(["python", script_path, src_path])
         with lock:
             is_running = False
 
 
 if __name__ == "__main__":
-    path_to_watch = r"C:/Users/UserK/Desktop/raw"
-
+    path_to_watch = config["pc_watching_folder"]
+    # path_to_watch = "C:/Users/UserK/Desktop/raw/"
     observer = Observer()
     event_handler = ImageFileEventHandler()
     observer.schedule(event_handler, path_to_watch, recursive=False)
