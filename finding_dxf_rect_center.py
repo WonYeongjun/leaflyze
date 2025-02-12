@@ -49,12 +49,10 @@ def remove_largest_rectangle(dxf_path):
     if largest_rectangle:
         print(f"가장 넓이가 큰 직사각형을 삭제합니다. 넓이: {largest_area}")
         print(f"그 직사각형의 중심은 {largest_center}")
-        radius = 3.0
-        modelspace.add_circle(center=largest_center, radius=radius)
-        doc.saveas("./image/updated_심포유강아지_생산_얼굴x12.dxf")
     else:
         print("직사각형을 찾을 수 없습니다.")
 
 
-dxf_file = "./image/심포유강아지_생산_얼굴x12.dxf"
-remove_largest_rectangle(dxf_file)
+if __name__ == "__main__":
+    dxf_file = "./image/심포유강아지_생산_얼굴x12.dxf"
+    remove_largest_rectangle(dxf_file)
