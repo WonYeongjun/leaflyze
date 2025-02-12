@@ -1,7 +1,7 @@
 {
   "username": "userk",
   "passward": "1234",
-  "ip_address": "192.168.1.100",
+  "ip_address": "172.30.1.98",
   "raspi_file_path": "/home/userk/cal_img/raw/raw_img.jpg",
   "pc_file_path": "C:/Users/UserK/Desktop/raw/raw_img.jpg",
   "pc_modified_file_path": "C:/Users/UserK/Desktop/fin/fin_img.jpg",
