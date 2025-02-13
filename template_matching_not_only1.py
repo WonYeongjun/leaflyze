@@ -12,7 +12,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./exm/glass/pink/fin_cal_img_20250207_141129.jpg")
+    img_bgr = cv2.imread("./image/exm/glass/pink/fin_cal_img_20250207_141129.jpg")
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -29,6 +29,7 @@ if __name__ == "__main__":
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
+    template_gray = cv2.GaussianBlur(template_gray, (9, 9), 0)
     height, width = template_gray.shape
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
