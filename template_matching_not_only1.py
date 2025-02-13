@@ -58,36 +58,42 @@ def select_best_points(points_list, optimal_height, optimal_width):
             np.linalg.norm(np.array(points[0][0]) - np.array(points[3][0]))
             + np.linalg.norm(np.array(points[1][0]) - np.array(points[2][0]))
         ) / 2
+
         height = (
             np.linalg.norm(np.array(points[2][0]) - np.array(points[3][0]))
             + np.linalg.norm(np.array(points[0][0]) - np.array(points[1][0]))
         ) / 2
+
         angle1 = calculate_angle(
-            sorted_matrix[1], sorted_matrix[0], sorted_matrix[3]
+            points[1][0], points[0][0], points[3][0]
         )  # 좌상, 우상, 우하
         angle2 = calculate_angle(
-            sorted_matrix[0], sorted_matrix[1], sorted_matrix[2]
+            points[0][0], points[1][0], points[2][0]
         )  # 우상, 좌상, 좌하
         angle3 = calculate_angle(
-            sorted_matrix[1], sorted_matrix[2], sorted_matrix[3]
+            points[1][0], points[2][0], points[3][0]
         )  # 좌상, 좌하, 우하
         angle4 = calculate_angle(
-            sorted_matrix[2], sorted_matrix[3], sorted_matrix[0]
+            points[2][0], points[3][0], points[0][0]
         )  # 좌하, 우하, 우상
-
-        rect_angle_std = np.std(angle1, angle2, angle3, angle4)
-        width_score = np.abs(optimal_width - width)
-        height_score = np.abs(optimal_height - height)
-        angles = [point_info[1] for point_info in points]
+        rect_angles = (angle1, angle2, angle3, angle4)
+        rect_angle_std = np.std(rect_angles)
+        width_score = np.abs(optimal_width - width) / optimal_width
+        height_score = np.abs(optimal_height - height) / optimal_height
+        marker_angles = [point_info[1] for point_info in points]
         scores = [point_info[3] for point_info in points]
 
         # 각도의 표준편차 계산
-        angle_std = np.std(angles)
+        marker_angle_std = np.std(marker_angles)
+
         # 점수의 합 계산
         total_score = sum(scores)
 
         assessment_score = total_score / (
-            (angle_std + 1) * (width_score + 1000) * (height_score + 1000)
+            (marker_angle_std + 1)
+            * (width_score + 10)
+            * (height_score + 10)
+            * (rect_angle_std + 1)
         )
 
         # 각도의 표준편차와 점수의 합을 고려하여 최적의 점 선택
@@ -96,7 +102,8 @@ def select_best_points(points_list, optimal_height, optimal_width):
             best_score = assessment_score
             width_best_score = width_score
             height_best_score = height_score
-    return best_points
+            rect_best = rect_angles
+    return best_points, width_best_score, height_best_score, rect_best
 
 
 if __name__ == "__main__":
@@ -145,7 +152,10 @@ if __name__ == "__main__":
     print(len(points_list))
     centers_list = []
     real_point = []
-    points_list = select_best_points(points_list, 900, 900)
+    points_list, width_best_score, height_best_score, rect_best = select_best_points(
+        points_list, 900, 900
+    )
+    print(width_best_score, height_best_score, rect_best)
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
