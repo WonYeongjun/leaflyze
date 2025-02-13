@@ -3,12 +3,45 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
-import random
+from itertools import combinations
 from template_func_not_only1 import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
 start_time = time.time()
+
+
+def sort_points(points):
+    points = sorted(points, key=lambda x: x[0])  # x 좌표 기준으로 정렬
+    left_points = points[:2]
+    right_points = points[2:]
+    left_points = sorted(left_points, key=lambda x: x[1])  # y 좌표 기준으로 정렬
+    right_points = sorted(right_points, key=lambda x: x[1])
+    return [right_points[1], left_points[1], left_points[0], right_points[0]]
+
+
+def select_best_points(points_list):
+    if len(points_list) < 4:
+        raise ValueError("points_list에 최소 4개의 점이 필요합니다.")
+
+    best_points = None
+    best_score = 0
+    # 모든 조합에서 4개의 점을 선택
+    for points in combinations(points_list, 4):
+        points = sort_points(points)
+        angles = [point_info[1] for point_info in points]
+        scores = [point_info[3] for point_info in points]
+        # 각도의 표준편차 계산
+        angle_std = np.std(angles)
+        # 점수의 합 계산
+        total_score = sum(scores)
+        assessment_score = total_score / (angle_std + 1)
+        # 각도의 표준편차와 점수의 합을 고려하여 최적의 점 선택
+        if assessment_score > best_score:
+            best_points = points
+            best_score = assessment_score
+    return best_points
+
 
 if __name__ == "__main__":
     threshold = 130
@@ -56,6 +89,7 @@ if __name__ == "__main__":
     print(len(points_list))
     centers_list = []
     real_point = []
+    points_list = select_best_points(points_list)
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
@@ -120,15 +154,6 @@ if __name__ == "__main__":
         print(matrix)
 
         # 좌표를 오른쪽 위, 왼쪽 위, 왼쪽 아래, 오른쪽 아래 순서로 정렬
-        def sort_points(points):
-            points = sorted(points, key=lambda x: x[0])  # x 좌표 기준으로 정렬
-            left_points = points[:2]
-            right_points = points[2:]
-            left_points = sorted(
-                left_points, key=lambda x: x[1]
-            )  # y 좌표 기준으로 정렬
-            right_points = sorted(right_points, key=lambda x: x[1])
-            return [right_points[1], left_points[1], left_points[0], right_points[0]]
 
         sorted_matrix = sort_points(matrix)
         print("정렬된 좌표 행렬:")
