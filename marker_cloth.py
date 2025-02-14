@@ -3,20 +3,8 @@ import math
 from sklearn.cluster import DBSCAN
 import numpy as np
 
-filename = "./image/cloth5"
-
-
-# 이미지 4분할
-def split_image(image, point, angle):
-    x, y = point
-    h, w = image.shape[:2]
-    rotation_matrix = cv2.getRotationMatrix2D((x, y), angle, 1)
-    rotated_image = cv2.warpAffine(image, rotation_matrix, (w, h))
-    top_left = rotated_image[0:y, 0:x]
-    top_right = rotated_image[0:y, x:]
-    bottom_left = rotated_image[y:, 0:x]
-    bottom_right = rotated_image[y:, x:]
-    return top_left, top_right, bottom_left, bottom_right
+# filename = "./image/pink/fin_cal_img_20250207_141129.jpg"
+filename = "./image/pink/fin_cal_img_20250207_141201"
 
 
 def remove_overlapping_contours(contours, img_size=(500, 500)):
@@ -55,17 +43,35 @@ if __name__ == "__main__":
     img = cv2.imread(f"{filename}.jpg", cv2.IMREAD_COLOR)
     size = img.shape[:2]
     print(size)
-    img = cv2.resize(
-        img, (800, 600)
-    )  # 이미지 크기 조정-카메라 설치 후 하이퍼파라미터 조정
 
     # Canny Edge Detection
+    img = cv2.blur(img, (3, 3))
     edges = cv2.Canny(img, 240, 240)
 
     kernel = np.ones((4, 4), np.uint8)
     morph = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-    edges = cv2.blur(edges, (3, 3))
     # 컨투어 검출 (Canny후에 블러처리까지 한 결과를 입력으로 사용)
+
+    import matplotlib.pyplot as plt
+
+    # Convert BGR image to RGB
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Plot the original image
+    plt.figure(figsize=(10, 10))
+    plt.subplot(1, 2, 1)
+    plt.title("Original Image")
+    plt.imshow(img_rgb)
+    plt.axis("off")
+
+    # Plot the edges
+    plt.subplot(1, 2, 2)
+    plt.title("Edges")
+    plt.imshow(edges, cmap="gray")
+    plt.axis("off")
+
+    plt.show()
+
     contours, hierarchy = cv2.findContours(
         morph, cv2.RETR_TREE, cv2.CHAIN_APPROX_TC89_KCOS
     )
