@@ -2,11 +2,11 @@ from ultralytics import YOLO
 import cv2
 
 # YOLOv8 기본 모델 다운로드 (첫 실행 시 자동 다운로드됨)
-model = YOLO("./runs\detect/train6/weights/best.pt")  # "n"은 nano 버전으로 가벼움
+model = YOLO("./runs\detect/train19/weights/best.pt")  # "n"은 nano 버전으로 가벼움
 
 # 이미지 로드
-# image_path = "./image/exm/glass/white/fin_cal_img_20250207_132352.jpg"
 image_path = "./image/cloth5.jpg"
+# image_path = "./datasets.yolov8/train/images/fin_cal_img_20250207_132352_jpg.rf.e04b30e5d29396cf057a95d248e910c5.jpg"
 image = cv2.imread(image_path)
 
 # YOLO 실행

@@ -3,11 +3,11 @@ val: ../valid/images
 test: ../test/images
 
 nc: 1
-names: ['4 -']
+names: ['objects']
 
 roboflow:
-  workspace: project-fhsyh
-  project: my-first-project-8cvil
-  version: 2
+  workspace: project-p3cn8
+  project: my-first-project-zlny4
+  version: 1
   license: CC BY 4.0
-  url: https://universe.roboflow.com/project-fhsyh/my-first-project-8cvil/dataset/2
+  url: https://universe.roboflow.com/project-p3cn8/my-first-project-zlny4/dataset/1

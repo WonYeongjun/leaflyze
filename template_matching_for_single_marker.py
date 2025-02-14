@@ -11,9 +11,7 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread(
-        "./datasets.yolov8/train/images/fin_cal_img_20250207_132352_jpg.rf.e04b30e5d29396cf057a95d248e910c5.jpg"
-    )
+    img_bgr = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -30,7 +28,7 @@ if __name__ == "__main__":
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
-    template_gray = cv2.GaussianBlur(template_gray, (9, 9), 0)
+    template_gray = cv2.GaussianBlur(template_gray, (11, 11), 0)
     height, width = template_gray.shape
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
@@ -43,7 +41,7 @@ if __name__ == "__main__":
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.4,
+        matched_thresh=0.5,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
@@ -55,6 +53,7 @@ if __name__ == "__main__":
     plt.gcf().canvas.manager.set_window_title("Template Matching Results: Rectangles")
     ax.imshow(img_rgb)
     print(len(points_list))
+    points_list = points_list[:10]
     centers_list = []
     real_point = []
     for point_info in points_list:
