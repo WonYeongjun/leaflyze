@@ -9,7 +9,9 @@ start_time = time.time()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-sam = sam_model_registry["vit_h"](checkpoint="sam_vit_h.pth").to(device)
+sam = sam_model_registry["vit_b"](checkpoint="C:/Users/UserK/Desktop/sam_vit_b.pth").to(
+    device
+)
 
 mask_generator = SamAutomaticMaskGenerator(sam)
 
@@ -17,7 +19,6 @@ mask_generator = SamAutomaticMaskGenerator(sam)
 image = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
 
 # SAM으로 마스크 생성
-
 masks = mask_generator.generate(image)
 
 # 가장 큰 마스크 찾기 (천일 가능성이 높음)
