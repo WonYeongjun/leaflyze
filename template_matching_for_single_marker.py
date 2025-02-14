@@ -11,7 +11,9 @@ start_time = time.time()
 
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./image/exm/glass/pink_15.jpg")
+    img_bgr = cv2.imread(
+        "./datasets.yolov8/train/images/fin_cal_img_20250207_132352_jpg.rf.e04b30e5d29396cf057a95d248e910c5.jpg"
+    )
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
