@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['4 -']
+
+roboflow:
+  workspace: project-fhsyh
+  project: my-first-project-8cvil
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/project-fhsyh/my-first-project-8cvil/dataset/1
