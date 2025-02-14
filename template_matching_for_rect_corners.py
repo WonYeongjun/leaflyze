@@ -3,16 +3,121 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
-import random
-from template_func_not_only1 import invariant_match_template  # ,template_crop
+from itertools import combinations
+from template_func_for_rect_corners import invariant_match_template  # ,template_crop
 import time
 
 # 시작 시간 기록
 start_time = time.time()
 
+
+def sort_points(points):
+    points = sorted(points, key=lambda x: x[0])  # x 좌표 기준으로 정렬
+    left_points = points[:2]
+    right_points = points[2:]
+    left_points = sorted(left_points, key=lambda x: x[1])  # y 좌표 기준으로 정렬
+    right_points = sorted(right_points, key=lambda x: x[1])
+    return [right_points[1], left_points[1], left_points[0], right_points[0]]
+
+
+def calculate_angle(p1, p2, p3):
+    """
+    점 p1, p2, p3가 이루는 각을 계산합니다.
+    p2가 각의 꼭짓점입니다.
+    """
+    # 벡터 계산
+    v1 = np.array(p1) - np.array(p2)
+    v2 = np.array(p3) - np.array(p2)
+
+    # 벡터의 크기 계산
+    norm_v1 = np.linalg.norm(v1)
+    norm_v2 = np.linalg.norm(v2)
+
+    # 벡터의 내적 계산
+    dot_product = np.dot(v1, v2)
+
+    # 각도 계산 (라디안 단위)
+    angle_rad = np.arccos(dot_product / (norm_v1 * norm_v2))
+
+    # 각도를 도 단위로 변환
+    angle_deg = np.degrees(angle_rad)
+
+    return angle_deg
+
+
+def select_best_points(points_list, optimal_height, optimal_width):
+    if len(points_list) < 4:
+        raise ValueError("points_list에 최소 4개의 점이 필요합니다.")
+
+    best_points = None
+    second_score = 0
+    best_score = 0
+    # 모든 조합에서 4개의 점을 선택
+    for points in combinations(points_list, 4):
+        points = sort_points(points)
+        width = (
+            np.linalg.norm(np.array(points[0][0]) - np.array(points[3][0]))
+            + np.linalg.norm(np.array(points[1][0]) - np.array(points[2][0]))
+        ) / 2
+
+        height = (
+            np.linalg.norm(np.array(points[2][0]) - np.array(points[3][0]))
+            + np.linalg.norm(np.array(points[0][0]) - np.array(points[1][0]))
+        ) / 2
+
+        angle1 = calculate_angle(
+            points[1][0], points[0][0], points[3][0]
+        )  # 좌상, 우상, 우하
+        angle2 = calculate_angle(
+            points[0][0], points[1][0], points[2][0]
+        )  # 우상, 좌상, 좌하
+        angle3 = calculate_angle(
+            points[1][0], points[2][0], points[3][0]
+        )  # 좌상, 좌하, 우하
+        angle4 = calculate_angle(
+            points[2][0], points[3][0], points[0][0]
+        )  # 좌하, 우하, 우상
+        rect_angles = (angle1, angle2, angle3, angle4)
+        rect_angle_std = np.std(rect_angles)
+        width_score = np.abs(optimal_width - width) / optimal_width
+        height_score = np.abs(optimal_height - height) / optimal_height
+        marker_angles = [point_info[1] for point_info in points]
+        scores = [point_info[3] for point_info in points]
+
+        # 각도의 표준편차 계산
+        marker_angle_std = np.std(marker_angles)
+
+        # 점수의 합 계산
+        total_score = sum(scores)
+        assessment_score = total_score / (
+            (marker_angle_std + 1)
+            * (width_score + 10)
+            * (height_score + 10)
+            * (rect_angle_std + 1)
+        )
+
+        # 각도의 표준편차와 점수의 합을 고려하여 최적의 점 선택
+        if assessment_score > best_score:
+            best_points = points
+            second_score = best_score
+            best_score = assessment_score
+            width_best_score = width_score
+            height_best_score = height_score
+            rect_best = rect_angles
+    return (
+        best_points,
+        width_best_score,
+        height_best_score,
+        rect_best,
+        best_score,
+        second_score,
+    )
+
+
 if __name__ == "__main__":
     threshold = 130
-    img_bgr = cv2.imread("./exm/glass/pink/fin_cal_img_20250207_141129.jpg")
+    # img_bgr = cv2.imread("./image/exm/glass/white/fin_cal_img_20250207_132426.jpg")
+    img_bgr = cv2.imread("./image/exm/glass/pink_10.jpg")
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -29,19 +134,20 @@ if __name__ == "__main__":
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
+    template_gray = cv2.GaussianBlur(template_gray, (9, 9), 0)
     height, width = template_gray.shape
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-    ax1.imshow(im, cmap="gray")
-    ax1.set_title("Original Grayscale Image")
-    ax2.imshow(img_gray, cmap="gray")
-    ax2.set_title("Processed Grayscale Image")
-    plt.show()
+    # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    # ax1.imshow(im, cmap="gray")
+    # ax1.set_title("Original Grayscale Image")
+    # ax2.imshow(img_gray, cmap="gray")
+    # ax2.set_title("Processed Grayscale Image")
+    # plt.show()
     points_list = invariant_match_template(
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.4,
+        matched_thresh=0.5,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
@@ -55,6 +161,16 @@ if __name__ == "__main__":
     print(len(points_list))
     centers_list = []
     real_point = []
+    (
+        points_list,
+        width_best_score,
+        height_best_score,
+        rect_best,
+        best_score,
+        second_score,
+    ) = select_best_points(points_list, 900, 900)
+    print(width_best_score, height_best_score, rect_best)
+    print(best_score, second_score)
     for point_info in points_list:
         point = point_info[0]
         angle = point_info[1]
@@ -107,9 +223,9 @@ if __name__ == "__main__":
     end_time = time.time()
     plt.show()
 
-    indices = input("원하는 점의 인덱스 4개를 입력하세요 (쉼표로 구분): ")
-    indices = list(map(int, indices.split(",")))
-
+    # indices = input("원하는 점의 인덱스 4개를 입력하세요 (쉼표로 구분): ")
+    # indices = list(map(int, indices.split(",")))
+    indices = [0, 1, 2, 3]
     if len(indices) != 4:
         print("4개의 인덱스를 입력해야 합니다.")
     else:
@@ -119,15 +235,6 @@ if __name__ == "__main__":
         print(matrix)
 
         # 좌표를 오른쪽 위, 왼쪽 위, 왼쪽 아래, 오른쪽 아래 순서로 정렬
-        def sort_points(points):
-            points = sorted(points, key=lambda x: x[0])  # x 좌표 기준으로 정렬
-            left_points = points[:2]
-            right_points = points[2:]
-            left_points = sorted(
-                left_points, key=lambda x: x[1]
-            )  # y 좌표 기준으로 정렬
-            right_points = sorted(right_points, key=lambda x: x[1])
-            return [right_points[1], left_points[1], left_points[0], right_points[0]]
 
         sorted_matrix = sort_points(matrix)
         print("정렬된 좌표 행렬:")
