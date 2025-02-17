@@ -1,19 +1,39 @@
 import cv2
-
-img = cv2.imread("./image/white/fin_cal_img_20250207_132352.jpg")
-img_filtered = cv2.bilateralFilter(img, d=9, sigmaColor=75, sigmaSpace=75)
-enhanced_img = cv2.convertScaleAbs(img, alpha=2.0, beta=0)
 import matplotlib.pyplot as plt
 
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
-img_morphed = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+
+def morphlogy_diff(img):
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
+    img_morphed = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+
+    difference = cv2.absdiff(img, img_morphed)
+    difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
+    difference_gray = 255 - difference_gray
+
+    return difference_gray
 
 
-difference = cv2.absdiff(img, img_morphed)
-difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
-difference_gray = 255 - difference_gray
-plt.figure(figsize=(10, 5))
-plt.title("Difference Image")
-plt.imshow(difference_gray, cmap="gray")
-plt.axis("off")
-plt.show()
+if __name__ == "__main__":
+
+    img = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    difference_gray = morphlogy_diff(img)
+    plt.figure(figsize=(15, 5))
+
+    plt.subplot(1, 3, 1)
+    plt.title("Original Image")
+    plt.imshow(cv2.cvtColor(img_gray, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+
+    plt.subplot(1, 3, 2)
+    plt.title("Morphed Image")
+    plt.imshow(cv2.cvtColor(img_gray, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+
+    plt.subplot(1, 3, 3)
+    plt.title("Difference Image (Gray)")
+    plt.imshow(difference_gray, cmap="gray")
+    plt.axis("off")
+
+    plt.show()

@@ -6,6 +6,7 @@ import matplotlib as mpl
 from func_for_single_marker import invariant_match_template  # ,template_crop
 import time
 from image_segmentation import point_of_interest
+from simplication import morphlogy_diff
 
 # 시작 시간 기록
 start_time = time.time()
@@ -19,7 +20,8 @@ if __name__ == "__main__":
     template_bgr = cv2.resize(
         template_bgr, (0, 0), fx=0.27, fy=0.27
     )  # 템플릿 사이즈 조절(초기 설정 필요)
-    img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
+    img_gray = morphlogy_diff(img_bgr)
+    # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     # 실제 이미지 이진화
     im = img_gray
     # img_gray = np.where(
