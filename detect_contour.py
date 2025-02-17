@@ -45,8 +45,8 @@ if __name__ == "__main__":
     print(size)
 
     # Canny Edge Detection
-    img = cv2.blur(img, (3, 3))
-    edges = cv2.Canny(img, 240, 240)
+    # img = cv2.blur(img, (3, 3))
+    edges = cv2.Canny(img, 30, 100)
 
     kernel = np.ones((4, 4), np.uint8)
     morph = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
@@ -111,6 +111,12 @@ if __name__ == "__main__":
     print(len(sorted_contours))
     for contour in sorted_contours:
         cv2.drawContours(img, [contour], -1, (0, 255, 0), 2)
-    cv2.imshow("Contours with Color Analysis", img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # Convert BGR image to RGB
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    # Plot the image with contours
+    plt.figure(figsize=(10, 10))
+    plt.title("Contours with Color Analysis")
+    plt.imshow(img_rgb)
+    plt.axis("off")
+    plt.show()
