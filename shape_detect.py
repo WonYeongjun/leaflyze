@@ -13,11 +13,11 @@ height, width, _ = image.shape
 # 색상과 위치 정보를 결합
 pixels = image_rgb.reshape(-1, 3)
 positions = np.indices((height, width)).reshape(2, -1).T
-positions = positions / np.max(positions)
+positions = positions / 5000
 data = np.hstack((pixels, positions))
 
 # K-means 클러스터링
-k = 3  # 군집의 수
+k = 4  # 군집의 수
 kmeans = KMeans(n_clusters=k, random_state=0).fit(data)
 labels = kmeans.labels_
 
