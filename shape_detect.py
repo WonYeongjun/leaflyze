@@ -1,33 +1,41 @@
 import cv2
 import numpy as np
+from sklearn.cluster import KMeans
 
 # 이미지 로드
-image = cv2.imread("./image/pink/fin_cal_img_20250207_141201.jpg")
-
-# 이미지를 BGR에서 RGB로 변환
+image_path = "./image/pink/fin_cal_img_20250207_141201.jpg"
+image = cv2.imread(image_path)
 image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-# 이미지를 2D 배열로 변환 (각 픽셀을 한 행으로)
-pixels = image_rgb.reshape((-1, 3))
-# K-means 군집화
-k = 10  # 군집의 수 (원하는 군집 수로 설정)
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
-_, labels, centers = cv2.kmeans(
-    np.float32(pixels), k, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS
-)
+# 이미지 크기
+height, width, _ = image.shape
 
-# 군집화된 색상 (centers는 각 군집의 중심 색상)
-centers = np.uint8(centers)
+# 색상과 위치 정보를 결합
+pixels = image_rgb.reshape(-1, 3)
+positions = np.indices((height, width)).reshape(2, -1).T
+positions = positions / np.max(positions)
+data = np.hstack((pixels, positions))
 
-# 각 픽셀을 군집화된 색상으로 교체
-segmented_image = centers[labels.flatten()]
+# K-means 클러스터링
+k = 3  # 군집의 수
+kmeans = KMeans(n_clusters=k, random_state=0).fit(data)
+labels = kmeans.labels_
 
-# 이미지를 원래 모양으로 다시 리셰이프
-segmented_image = segmented_image.reshape(image_rgb.shape)
+# 클러스터링 결과를 이미지로 변환
+segmented_image = labels.reshape(height, width)
 
-# 결과 이미지 출력
+# 클러스터링 결과 시각화
+unique_labels = np.unique(labels)
+segmented_image_rgb = np.zeros_like(image_rgb)
+
+for label in unique_labels:
+    mask = segmented_image == label
+    color = np.random.randint(0, 255, size=3)
+    segmented_image_rgb[mask] = color
+
+# 결과 이미지 저장 및 출력
 import matplotlib.pyplot as plt
 
-plt.imshow(segmented_image)
-plt.axis("off")  # 축을 숨김
+plt.imshow(segmented_image_rgb)
+plt.axis("off")  # 축 숨기기
 plt.show()
