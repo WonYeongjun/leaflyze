@@ -5,6 +5,7 @@ import matplotlib.patches as patches
 import matplotlib as mpl
 from func_for_single_marker import invariant_match_template  # ,template_crop
 import time
+from image_segmentation import point_of_interest
 
 # 시작 시간 기록
 start_time = time.time()
@@ -12,6 +13,7 @@ start_time = time.time()
 if __name__ == "__main__":
     threshold = 130
     img_bgr = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
+    img_bgr = point_of_interest(img_bgr)
 
     template_bgr = plt.imread("./image/marker_ideal.jpg")
     template_bgr = cv2.resize(
@@ -31,12 +33,12 @@ if __name__ == "__main__":
     template_gray = cv2.GaussianBlur(template_gray, (11, 11), 0)
     height, width = template_gray.shape
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
-    ax1.imshow(template_gray, cmap="gray")
-    ax1.set_title("Original Grayscale Image")
-    ax2.imshow(img_gray, cmap="gray")
-    ax2.set_title("Processed Grayscale Image")
-    plt.show()
+    # fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    # ax1.imshow(template_gray, cmap="gray")
+    # ax1.set_title("Original Grayscale Image")
+    # ax2.imshow(img_gray, cmap="gray")
+    # ax2.set_title("Processed Grayscale Image")
+    # plt.show()
     points_list = invariant_match_template(
         grayimage=img_gray,
         graytemplate=template_gray,

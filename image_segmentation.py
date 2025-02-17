@@ -26,7 +26,7 @@ def point_of_interest(image):
 
     # 마스크 예측
     masks, sinre, _ = predictor.predict(
-        point_coords=input_point, point_labels=input_label, multimask_output=True
+        point_coords=input_point, point_labels=input_label, multimask_output=False
     )
     print(sinre)
     mask = masks[0]
@@ -44,7 +44,6 @@ def point_of_interest(image):
 if __name__ == "__main__":
     image_path = "./image/pink/fin_cal_img_20250207_141229.jpg"
     image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     cropped_image = point_of_interest(image)
     # 크기 조정 (예: 50% 축소)
     scale_percent = 50
