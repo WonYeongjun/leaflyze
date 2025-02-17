@@ -14,7 +14,7 @@ sam = sam_model_registry["vit_b"](checkpoint="C:/Users/UserK/Desktop/sam_vit_b.p
 predictor = SamPredictor(sam)
 end_time = time.time()
 # 이미지 로드
-image_path = "./image/cloth4.jpg"
+image_path = "./image/pink/fin_cal_img_20250207_141229.jpg"
 image = cv2.imread(image_path)
 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -22,15 +22,14 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 predictor.set_image(image)
 
 # 특정 좌표 클릭하여 객체 선택 (x, y는 수동 입력 또는 자동 탐색 가능)
-input_point = np.array([[image.shape[1] // 2, image.shape[0] // 2]])  # 중앙 선택
+input_point = np.array([[image.shape[1] // 10, image.shape[0] // 10]])  # 중앙 선택
 input_label = np.array([1])  # 1: 객체 선택
 
 # 마스크 예측
-masks, _, _ = predictor.predict(
-    point_coords=input_point, point_labels=input_label, multimask_output=False
+masks, _, what = predictor.predict(
+    point_coords=input_point, point_labels=input_label, multimask_output=True
 )
-
-# 가장 확신이 높은 마스크 선택
+print(what)
 mask = masks[0]
 
 # 객체 크기에 맞춰 크롭하기 위해 바운딩 박스 계산
