@@ -36,21 +36,17 @@ if __name__ == "__main__":
         points_list = invariant_match_template(
             grayimage=img_gray,
             graytemplate=template_blur,
-            method="TM_CCOEFF",
             matched_thresh=0.5,
             rot_range=[-10, 10],
             rot_interval=2,
             scale_range=[90, 110],
             scale_interval=2,
-            rm_redundant=True,
-            minmax=True,
         )
         fig, ax = plt.subplots(1)
         plt.gcf().canvas.manager.set_window_title(
             "Template Matching Results: Rectangles"
         )
         ax.imshow(img_rgb)
-        print(len(points_list))
         points_list = points_list[:10]
         centers_list = []
         real_point = []
@@ -58,9 +54,6 @@ if __name__ == "__main__":
             point = point_info[0]
             angle = point_info[1]
             scale = point_info[2]
-            print(
-                f"No.{str(points_list.index(point_info))} matched point: {point}, angle: {angle}, scale: {scale}, score: {point_info[3]}"
-            )
             centers_list.append([point, scale])
             plt.scatter(
                 point[0] + (width / 2) * scale[0] / 100,
