@@ -3,36 +3,61 @@ import numpy as np
 from sklearn.cluster import KMeans
 from simplication import morphlogy_diff
 import matplotlib.pyplot as plt
+from sklearn.linear_model import RANSACRegressor
 
 # 이미지 로드
 image_path = "./image/pink/fin_cal_img_20250207_141201.jpg"
 image = cv2.imread(image_path)
 image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 img_gray, _ = morphlogy_diff(image)
-plt.imshow(img_gray, cmap="gray")
-plt.axis("off")  # 축 숨기기
-plt.show()
-# 이미지 크기
+
 height, width = img_gray.shape
-# 컨투어 검출
-# 컨투어 검출
-contours, _ = cv2.findContours(img_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# RANSAC을 이용한 선형 검출
-segmented_image = np.zeros_like(img_gray)
-for contour in contours:
-    if len(contour) >= 2:  # 최소 두 개의 점이 필요
-        points = contour.reshape(-1, 2)
-        model_ransac = cv2.fitLine(points, cv2.DIST_L2, 0, 0.01, 0.01)
-        vx, vy, x, y = model_ransac.flatten()
-        lefty = int((-x * vy / vx) + y)
-        righty = int(((width - x) * vy / vx) + y)
-        cv2.line(segmented_image, (width - 1, righty), (0, lefty), 255, 1)
+edges = cv2.Canny(img_gray, 20, 80)
 
-# 결과 이미지
-segmented_image_rgb = cv2.cvtColor(segmented_image, cv2.COLOR_GRAY2RGB)
+kernel = np.ones((5, 5), np.uint8)
+morph = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# for contour in contours:
+#     points = contour.squeeze()  # (N, 1, 2) -> (N, 2)
+#     if len(points.shape) != 2 or points.shape[0] < 2:
+#         continue
 
+#     # X, Y 분리
+#     X = points[:, 0].reshape(-1, 1)
+#     Y = points[:, 1]
 
-plt.imshow(segmented_image_rgb)
-plt.axis("off")  # 축 숨기기
+#     # RANSAC 적용
+#     ransac = RANSACRegressor()
+#     ransac.fit(X, Y)
+#     line_X = np.array([X.min(), X.max()]).reshape(-1, 1)
+#     line_Y = ransac.predict(line_X)
+#     cv2.line(
+#         image_rgb,
+#         (int(line_X[0].item()), int(line_Y[0].item())),
+#         (int(line_X[1].item()), int(line_Y[1].item())),
+#         (0, 0, 255),
+#         2,
+#     )
+img_binary = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+lines = cv2.HoughLinesP(
+    img_binary, 1, np.pi / 180, threshold=100, minLineLength=50, maxLineGap=10
+)
+if lines is not None:
+    for line in lines:
+        x1, y1, x2, y2 = line[0]
+        cv2.line(image_rgb, (x1, y1), (x2, y2), (255, 255, 0), 2)
+
+plt.figure(figsize=(10, 5))
+
+plt.subplot(1, 2, 1)
+plt.imshow(img_binary, cmap="gray")
+plt.title("Morphological Transformation")
+plt.axis("off")
+
+plt.subplot(1, 2, 2)
+plt.imshow(image_rgb)
+plt.title("Detected Lines")
+plt.axis("off")
+
 plt.show()

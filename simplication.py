@@ -12,7 +12,8 @@ def morphlogy_diff(img):
     blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)  # 블러 적용
     sharp = cv2.addWeighted(difference_gray, 1.5, blurred, -0.5, 0)
     print(difference_gray.shape, sharp.shape)
-    return difference_gray, sharp
+    img_binary = cv2.threshold(sharp, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    return difference_gray, sharp, img_binary
 
 
 if __name__ == "__main__":
