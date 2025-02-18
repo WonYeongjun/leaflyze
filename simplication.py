@@ -9,9 +9,10 @@ def morphlogy_diff(img):
     difference = cv2.absdiff(img, img_morphed)
     difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
     difference_gray = 255 - difference_gray
-    blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)  # 블러 적용
+
+    blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)
     sharp = cv2.addWeighted(difference_gray, 1.5, blurred, -0.5, 0)
-    print(difference_gray.shape, sharp.shape)
+
     img_binary = cv2.threshold(sharp, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     return difference_gray, sharp, img_binary
 
