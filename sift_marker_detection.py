@@ -2,22 +2,15 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from image_segmentation import point_of_interest
+from simplication import morphlogy_diff
 
 
 def extract_sift_features(img):
-    """SIFT 특징점과 기술자 추출 함수"""
-    if len(img.shape) == 3:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    elif img.dtype != np.uint8:
-        img = img.astype(np.uint8)
 
     # SIFT 객체 생성 (파라미터 튜닝)
     sift = cv2.SIFT_create(
         nOctaveLayers=7, contrastThreshold=0.1, edgeThreshold=20, sigma=1.9
     )
-
-    # 이미지 전처리 (가우시안 블러로 노이즈 제거)
-    # img_blurred = cv2.GaussianBlur(img, (5, 5), 1.5)
 
     # 특징점과 디스크립터 계산
     keypoints, descriptors = sift.detectAndCompute(img, None)
@@ -109,12 +102,11 @@ def find_multiple_markers(
 if __name__ == "__main__":
     # 이미지 파일 경로
     image_path = "./image/pink/fin_cal_img_20250207_141129.jpg"  # 예: "sample.jpg"
-    template_path = "./image/marker4you.jpg"
-
+    template_path = "./image/marker_4.png"
     # 이미지 및 템플릿 로드
     image = cv2.imread(image_path)
     image = point_of_interest(image)
-
+    image, _ = morphlogy_diff(image)
     template = cv2.imread(template_path)
 
     # 템플릿에서 SIFT 특징점 및 기술자 추출

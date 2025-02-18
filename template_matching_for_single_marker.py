@@ -16,19 +16,14 @@ if __name__ == "__main__":
     img_bgr = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
     img_bgr = point_of_interest(img_bgr)
 
-    template_bgr = plt.imread("./image/marker_ideal.jpg")
+    template_bgr = cv2.imread("./image/marker_4.png")
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.27, fy=0.27
+        template_bgr, (0, 0), fx=1, fy=1
     )  # 템플릿 사이즈 조절(초기 설정 필요)
-    img_gray = morphlogy_diff(img_bgr)
+    _, _, img_gray = morphlogy_diff(img_bgr)
     # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     # 실제 이미지 이진화
     im = img_gray
-    # img_gray = np.where(
-    #     img_gray > threshold,
-    #     np.random.randint(245, 256, img_gray.shape, dtype=np.uint8),
-    #     np.random.randint(0, 11, img_gray.shape, dtype=np.uint8),
-    # )
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
     _, template_gray = cv2.threshold(template_gray, threshold, 255, cv2.THRESH_BINARY)
@@ -45,7 +40,7 @@ if __name__ == "__main__":
         grayimage=img_gray,
         graytemplate=template_gray,
         method="TM_CCOEFF",
-        matched_thresh=0.5,
+        matched_thresh=0.3,
         rot_range=[-10, 10],
         rot_interval=2,
         scale_range=[90, 110],
@@ -110,6 +105,6 @@ if __name__ == "__main__":
         plt.legend(handles=[rectangle])
     # plt.grid(True)
     end_time = time.time()
-    plt.show()
+    # plt.show()
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time} 초")
