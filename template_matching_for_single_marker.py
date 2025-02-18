@@ -16,11 +16,11 @@ if __name__ == "__main__":
     img_bgr = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
     img_bgr = point_of_interest(img_bgr)
 
-    template_bgr = plt.imread("./image/marker_ideal.jpg")
+    template_bgr = cv2.imread("./image/marker_4.png")
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.27, fy=0.27
+        template_bgr, (0, 0), fx=1, fy=1
     )  # 템플릿 사이즈 조절(초기 설정 필요)
-    img_gray = morphlogy_diff(img_bgr)
+    img_gray, _ = morphlogy_diff(img_bgr)
     # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     # 실제 이미지 이진화
     im = img_gray

@@ -9,8 +9,11 @@ def morphlogy_diff(img):
     difference = cv2.absdiff(img, img_morphed)
     difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
     difference_gray = 255 - difference_gray
-
-    return difference_gray
+    blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)  # 블러 적용
+    sharp = cv2.addWeighted(
+        difference_gray, 1.5, blurred, -0.5, 0
+    )  # 원본과 블러 차이 강조
+    return difference_gray, sharp
 
 
 if __name__ == "__main__":
@@ -18,7 +21,7 @@ if __name__ == "__main__":
     img = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    difference_gray = morphlogy_diff(img)
+    difference_gray, sharp = morphlogy_diff(img)
     plt.figure(figsize=(15, 5))
 
     plt.subplot(1, 3, 1)
@@ -28,7 +31,7 @@ if __name__ == "__main__":
 
     plt.subplot(1, 3, 2)
     plt.title("Morphed Image")
-    plt.imshow(cv2.cvtColor(img_gray, cv2.COLOR_BGR2RGB))
+    plt.imshow(cv2.cvtColor(sharp, cv2.COLOR_BGR2RGB))
     plt.axis("off")
 
     plt.subplot(1, 3, 3)
