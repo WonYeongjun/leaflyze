@@ -10,9 +10,8 @@ def morphlogy_diff(img):
     difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
     difference_gray = 255 - difference_gray
     blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)  # 블러 적용
-    sharp = cv2.addWeighted(
-        difference_gray, 1.5, blurred, -0.5, 0
-    )  # 원본과 블러 차이 강조
+    sharp = cv2.addWeighted(difference_gray, 1.5, blurred, -0.5, 0)
+    print(difference_gray.shape, sharp.shape)
     return difference_gray, sharp
 
 
