@@ -43,12 +43,12 @@ if __name__ == "__main__":
             scale_interval=2,
         )
 
-        fig, ax = plt.subplots(1)
+        fig, image_axes = plt.subplots(1)
         plt.gcf().canvas.manager.set_window_title(
             "Template Matching Results: Rectangles"
         )
 
-        ax.imshow(img_rgb)
+        image_axes.imshow(img_rgb)
         points_list = points_list[:10]
         for point_info in points_list:
             point = point_info[0]
@@ -87,10 +87,10 @@ if __name__ == "__main__":
                     point[1] + height / 2 * scale[1] / 100,
                     angle,
                 )
-                + ax.transData
+                + image_axes.transData
             )
             rectangle.set_transform(transform)
-            ax.add_patch(rectangle)
+            image_axes.add_patch(rectangle)
 
         plt.legend(handles=[rectangle])
         plt.grid(True)
