@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.patches as patches
 import matplotlib as mpl
-from func_for_single_marker import invariant_match_template  # ,template_crop
+from func_for_single_marker import invariant_match_template
 import time
 from image_segmentation import point_of_interest
 from simplication import morphlogy_diff
@@ -13,7 +13,7 @@ import os
 start_time = time.time()
 
 
-example_fabric_type = "pink"
+example_fabric_type = "white"
 
 
 if __name__ == "__main__":
@@ -42,19 +42,18 @@ if __name__ == "__main__":
             scale_range=[90, 110],
             scale_interval=2,
         )
+
         fig, ax = plt.subplots(1)
         plt.gcf().canvas.manager.set_window_title(
             "Template Matching Results: Rectangles"
         )
+
         ax.imshow(img_rgb)
         points_list = points_list[:10]
-        centers_list = []
-        real_point = []
         for point_info in points_list:
             point = point_info[0]
             angle = point_info[1]
             scale = point_info[2]
-            centers_list.append([point, scale])
             plt.scatter(
                 point[0] + (width / 2) * scale[0] / 100,
                 point[1] + (height / 2) * scale[1] / 100,
@@ -65,7 +64,6 @@ if __name__ == "__main__":
                 point[0] + (width / 2) * scale[0] / 100,
                 point[1] + (height / 2) * scale[1] / 100,
             )
-            real_point.append([idx])
             plt.scatter(point[0], point[1], s=20, color="green")
             rectangle = patches.Rectangle(
                 (point[0], point[1]),
@@ -83,7 +81,6 @@ if __name__ == "__main__":
                 fontsize=12,
                 weight="bold",
             )
-
             transform = (
                 mpl.transforms.Affine2D().rotate_deg_around(
                     point[0] + width / 2 * scale[0] / 100,
@@ -94,19 +91,20 @@ if __name__ == "__main__":
             )
             rectangle.set_transform(transform)
             ax.add_patch(rectangle)
-            plt.legend(handles=[rectangle])
-        ans_list.append([point_info[3] for point_info in points_list[:5]])
+
+        plt.legend(handles=[rectangle])
         plt.grid(True)
         file_name = os.path.basename(file)
         image_save_path = f"./output/{example_fabric_type}/output_{file_name}"
         plt.savefig(image_save_path, dpi=300)
-    end_time = time.time()
+
+    ans_list.append([point_info[3] for point_info in points_list[:5]])
 
     file_path = f"./output/{example_fabric_type}/output_{example_fabric_type}.txt"
-
     with open(file_path, "w") as file:
         for item in ans_list:
             file.write(f"{item}\n")
 
+    end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time} 초")

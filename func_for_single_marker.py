@@ -37,17 +37,14 @@ def invariant_match_template(
             for k in range(rot_range[0], rot_range[1] + 1, rot_interval):
                 scale_angle_combine.append([i, j, k])
 
-    img_gray = grayimage
-    template_gray = graytemplate
-    image_maxwh = img_gray.shape
-    height, width = template_gray.shape
+    height, width = graytemplate.shape
     all_points = []
 
     from concurrent.futures import ThreadPoolExecutor
 
     def process_template(scale_and_angle):
-        processed_template = scale_image(template_gray, scale_and_angle)
-        result = cv2.matchTemplate(img_gray, processed_template, cv2.TM_CCOEFF_NORMED)
+        processed_template = scale_image(graytemplate, scale_and_angle)
+        result = cv2.matchTemplate(grayimage, processed_template, cv2.TM_CCOEFF_NORMED)
         ys, xs = np.where(result >= matched_thresh)
         matches = []
         matches = [
@@ -88,7 +85,7 @@ def invariant_match_template(
                     abs(visited_point[1] - point[1]) < (height * scale[1] / 100)
                 ):
                     all_visited_points_not_close = False
-                    break  # 이미 가까운 점이 있으면 더 체크할 필요 없음
+                    break
 
             if all_visited_points_not_close:
                 lone_points_list.append(point_info)
@@ -96,7 +93,7 @@ def invariant_match_template(
 
         return lone_points_list
 
-    chunk_size = max(1, len(all_points) // 4)  # 스레드당 할당할 포인트 개수
+    chunk_size = max(1, len(all_points) // 4)
     chunks = [
         all_points[i : i + chunk_size] for i in range(0, len(all_points), chunk_size)
     ]
@@ -104,7 +101,6 @@ def invariant_match_template(
     with ThreadPoolExecutor() as executor2:
         results = executor2.map(filter_redundant_points, chunks)
 
-    # 여러 스레드 결과를 합치면서 최종 중복 제거
     final_lone_points = []
     final_visited_points = []
 
