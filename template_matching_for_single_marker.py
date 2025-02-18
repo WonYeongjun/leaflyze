@@ -99,17 +99,14 @@ if __name__ == "__main__":
         plt.grid(True)
         file_name = os.path.basename(file)
         image_save_path = f"./output/{example_fabric_type}/output_{file_name}"
-        plt.savefig(
-            image_save_path, dpi=300
-        )  # dpi를 300으로 설정하여 고해상도 이미지 저장
+        plt.savefig(image_save_path, dpi=300)
     end_time = time.time()
 
     file_path = f"./output/{example_fabric_type}/output_{example_fabric_type}.txt"
 
-    # 리스트를 텍스트 파일로 저장
     with open(file_path, "w") as file:
         for item in ans_list:
-            file.write(f"{item}\n")  # 각 항목을 한 줄에 저장
+            file.write(f"{item}\n")
 
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time} 초")
