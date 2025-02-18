@@ -10,35 +10,32 @@ from simplication import morphlogy_diff
 import glob
 import os
 
-# 시작 시간 기록
 start_time = time.time()
-color = "pink"
+
+
+example_fabric_type = "pink"
+
+
 if __name__ == "__main__":
     ans_list = []
-    image_files = glob.glob(f"./image/{color}/*.jpg")
+    image_files = glob.glob(f"./image/{example_fabric_type}/*.jpg")
     for file in image_files:
-        threshold = 130
         img_bgr = cv2.imread(file)
         img_bgr = point_of_interest(img_bgr)
+        _, _, img_gray = morphlogy_diff(img_bgr)
+        img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
 
         template_bgr = cv2.imread("./image/marker_4.png")
         template_bgr = cv2.resize(
             template_bgr, (0, 0), fx=1, fy=1
         )  # 템플릿 사이즈 조절(초기 설정 필요)
-        _, _, img_gray = morphlogy_diff(img_bgr)
-        # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-        # 실제 이미지 이진화
-        im = img_gray
-        img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
         template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
-        _, template_gray = cv2.threshold(
-            template_gray, threshold, 255, cv2.THRESH_BINARY
-        )
-        template_gray = cv2.GaussianBlur(template_gray, (11, 11), 0)
-        height, width = template_gray.shape
+        template_blur = cv2.GaussianBlur(template_gray, (11, 11), 0)
+        height, width = template_blur.shape
+
         points_list = invariant_match_template(
             grayimage=img_gray,
-            graytemplate=template_gray,
+            graytemplate=template_blur,
             method="TM_CCOEFF",
             matched_thresh=0.5,
             rot_range=[-10, 10],
@@ -108,13 +105,13 @@ if __name__ == "__main__":
         ans_list.append([point_info[3] for point_info in points_list[:5]])
         plt.grid(True)
         file_name = os.path.basename(file)
-        image_save_path = f"./output/{color}/output_{file_name}"
+        image_save_path = f"./output/{example_fabric_type}/output_{file_name}"
         plt.savefig(
             image_save_path, dpi=300
         )  # dpi를 300으로 설정하여 고해상도 이미지 저장
     end_time = time.time()
 
-    file_path = f"./output/{color}/output_{color}.txt"
+    file_path = f"./output/{example_fabric_type}/output_{example_fabric_type}.txt"
 
     # 리스트를 텍스트 파일로 저장
     with open(file_path, "w") as file:
