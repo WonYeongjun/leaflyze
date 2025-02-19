@@ -1,20 +1,21 @@
 import cv2
 import numpy as np
 import itertools
+from concurrent.futures import ThreadPoolExecutor
 
 
-def rotate_image(image, angle):
+def _rotate_image(image, angle):
     image_center = tuple(np.array(image.shape[1::-1]) / 2)
     rot_mat = cv2.getRotationMatrix2D(image_center, -angle, 1.0)
     result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
     return result
 
 
-def scale_image(image, percent):
+def _scale_image(image, percent):
     width = int(image.shape[1] * percent[0] / 100)
     height = int(image.shape[0] * percent[1] / 100)
     result = cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
-    result = rotate_image(result, percent[2])
+    result = _rotate_image(result, percent[2])
     return result
 
 
@@ -40,10 +41,8 @@ def invariant_match_template(
     height, width = graytemplate.shape
     all_points = []
 
-    from concurrent.futures import ThreadPoolExecutor
-
     def process_template(scale_and_angle):
-        processed_template = scale_image(graytemplate, scale_and_angle)
+        processed_template = _scale_image(graytemplate, scale_and_angle)
         result = cv2.matchTemplate(grayimage, processed_template, cv2.TM_CCOEFF_NORMED)
         ys, xs = np.where(result >= matched_thresh)
         matches = []

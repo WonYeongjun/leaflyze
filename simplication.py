@@ -2,11 +2,11 @@ import cv2
 import matplotlib.pyplot as plt
 
 
-def morphlogy_diff(img):
+def morphlogy_diff(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
-    img_morphed = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+    img_morphed = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
 
-    difference = cv2.absdiff(img, img_morphed)
+    difference = cv2.absdiff(image, img_morphed)
     difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
     difference_gray = 255 - difference_gray
 
@@ -15,6 +15,15 @@ def morphlogy_diff(img):
 
     img_binary = cv2.threshold(sharp, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     return difference_gray, sharp, img_binary
+
+
+def add(a, b):
+    return a + b
+
+
+def side_effect_add(a, b):
+    a = a + b
+    return a
 
 
 if __name__ == "__main__":

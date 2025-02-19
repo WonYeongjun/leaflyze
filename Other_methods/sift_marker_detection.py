@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from image_segmentation import point_of_interest
+from get_point_of_interest import get_point_of_interest
 from simplication import morphlogy_diff
 
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     template_path = "./image/marker_4.png"
     # 이미지 및 템플릿 로드
     image = cv2.imread(image_path)
-    image = point_of_interest(image)
+    image = get_point_of_interest(image)
     image, _ = morphlogy_diff(image)
     template = cv2.imread(template_path)
 

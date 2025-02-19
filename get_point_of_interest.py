@@ -6,7 +6,7 @@ import glob
 import matplotlib.pyplot as plt
 
 
-def point_of_interest(image):
+def get_point_of_interest(image):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     sam = sam_model_registry["vit_b"](
         checkpoint="C:/Users/UserK/Desktop/sam_vit_b.pth"
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     for i, file in enumerate(image_files):
         image = cv2.imread(file)
-        cropped_image = point_of_interest(image)
+        cropped_image = get_point_of_interest(image)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         axes[i, 0].imshow(image)
