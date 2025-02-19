@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-from sklearn.cluster import KMeans
+
 from simplification import morphology_diff
 import matplotlib.pyplot as plt
-from sklearn.linear_model import RANSACRegressor
+
 
 # 이미지 로드
 image_path = "./image/pink/fin_cal_img_20250207_141201.jpg"
