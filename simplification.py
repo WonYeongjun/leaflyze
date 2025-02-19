@@ -2,32 +2,13 @@ import cv2
 import matplotlib.pyplot as plt
 
 
-def make_mask_of_noise(image):
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
-    img_morphed = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
-
-    difference_with_morph = cv2.absdiff(image, img_morphed)
-    difference_with_morph_gray = cv2.cvtColor(difference_with_morph, cv2.COLOR_BGR2GRAY)
-    mask_for_noise = cv2.inRange(difference_with_morph_gray, 0, 10)
-    plt.imshow(mask_for_noise, cmap="gray")
-    plt.show()
-
-    return mask_for_noise
-
-
 def morphology_diff(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
-    img_morphed = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+    img_morphed = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
     difference_with_morph = cv2.absdiff(image, img_morphed)
     difference_with_morph_gray = cv2.cvtColor(difference_with_morph, cv2.COLOR_BGR2GRAY)
     difference_with_morph_gray_inversed = 255 - difference_with_morph_gray
-    mask = make_mask_of_noise(image)
-    difference_with_morph_gray_inversed = cv2.bitwise_and(
-        difference_with_morph_gray_inversed,
-        difference_with_morph_gray_inversed,
-        mask=mask,
-    )
     difference_with_morph_gray_inversed[difference_with_morph_gray_inversed == 0] = 255
     blurred = cv2.GaussianBlur(difference_with_morph_gray_inversed, (9, 9), 10)
     contour_emphasized = cv2.addWeighted(
