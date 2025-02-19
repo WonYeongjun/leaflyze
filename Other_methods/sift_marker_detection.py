@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from get_point_of_interest import get_point_of_interest
-from simplication import morphlogy_diff
+from simplification import morphology_diff
 
 
 def extract_sift_features(img):
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     # 이미지 및 템플릿 로드
     image = cv2.imread(image_path)
     image = get_point_of_interest(image)
-    image, _ = morphlogy_diff(image)
+    image, _ = morphology_diff(image)
     template = cv2.imread(template_path)
 
     # 템플릿에서 SIFT 특징점 및 기술자 추출

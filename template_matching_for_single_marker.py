@@ -9,7 +9,7 @@ import math
 
 from invariant_match_template import invariant_match_template
 from get_point_of_interest import get_point_of_interest
-from simplication import morphlogy_diff
+from simplification import morphology_diff
 
 start_time = time.time()
 
@@ -28,7 +28,9 @@ class PointInfo:
 
 if __name__ == "__main__":
     ans_list = []
-    image_files = glob.glob(f"./image/{example_fabric_type}/*.jpg")
+    # image_files = glob.glob(f"./image/{example_fabric_type}/*.jpg")
+    image_files = glob.glob("C:/Users/UserK/Desktop/fin/*.jpg")
+
     grid_cols = 2
     grid_rows = math.ceil(len(image_files) / grid_cols)
     fig, axes = pyplot.subplots(grid_rows, grid_cols, figsize=(15, 15))
@@ -37,7 +39,7 @@ if __name__ == "__main__":
     for index, file in enumerate(image_files):
         img_bgr = cv2.imread(file)
         img_bgr = get_point_of_interest(img_bgr)
-        _, _, img_gray = morphlogy_diff(img_bgr)
+        _, _, img_gray = morphology_diff(img_bgr)
         img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
 
         template_bgr = cv2.imread("./image/marker_4.png")

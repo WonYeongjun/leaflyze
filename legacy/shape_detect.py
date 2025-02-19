@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
-from simplication import morphlogy_diff
+from simplification import morphology_diff
 import matplotlib.pyplot as plt
 from sklearn.linear_model import RANSACRegressor
 
@@ -9,7 +9,7 @@ from sklearn.linear_model import RANSACRegressor
 image_path = "./image/pink/fin_cal_img_20250207_141201.jpg"
 image = cv2.imread(image_path)
 image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-img_gray, _ = morphlogy_diff(image)
+img_gray, _ = morphology_diff(image)
 
 height, width = img_gray.shape
 
