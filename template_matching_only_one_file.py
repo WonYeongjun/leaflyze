@@ -7,11 +7,9 @@ from matplotlib import pyplot, patches
 from invariant_match_template import invariant_match_template
 from get_point_of_interest import get_point_of_interest
 from simplification import morphology_diff
+from shape_detect import detect_shape
 
 start_time = time.time()
-
-
-example_fabric_type = "pink"
 
 
 class PointInfo:
@@ -24,28 +22,29 @@ class PointInfo:
 
 
 if __name__ == "__main__":
-    ans_list = []
-    # image_files = glob.glob(f"./image/{example_fabric_type}/*.jpg")
     image_path = "C:/Users/UserK/Desktop/fin/fin_img.jpg"
 
     img_bgr = cv2.imread(image_path)
     img_bgr = get_point_of_interest(img_bgr)
     img_gray, _, _ = morphology_diff(img_bgr)
-    # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    # threshold_value = 128  # You can change this value to set your own threshold
-    # _, img_gray = cv2.threshold(img_gray, threshold_value, 255, cv2.THRESH_BINARY)
-    img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
+    shape_image = detect_shape(img_gray)
 
+    img_rgb = cv2.cvtColor(shape_image, cv2.COLOR_GRAY2RGB)
+    img_rgb = img_rgb * 255
+    pyplot.imshow(img_rgb)
+    pyplot.title("Detected Lines")
+    pyplot.axis("off")
+    pyplot.show()
     template_bgr = cv2.imread("./image/marker_4_reversed.png")
     template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.8, fy=0.8
+        template_bgr, (0, 0), fx=0.9, fy=0.9
     )  # TODO: 템플릿 사이즈 조절
     template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
-    # template_blur = cv2.GaussianBlur(template_gray, (11, 11), 0)
+    template_blur = cv2.GaussianBlur(template_gray, (11, 11), 0)
     height, width = template_gray.shape
 
     result = invariant_match_template(
-        grayimage=img_gray,
+        grayimage=shape_image,
         graytemplate=template_gray,
         matched_thresh=0.4,
         rot_range=[-10, 10],
