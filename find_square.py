@@ -1,9 +1,13 @@
+import time
+
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-
+from concurrent.futures import ProcessPoolExecutor
 from simplification import morphology_diff
 from shape_detect import detect_lines
+
+start_time = time.time()
 
 
 def sum_pixels_at_coordinates(image, coordinates):
@@ -18,6 +22,30 @@ def get_white_pixel_coordinates(image):
     return [(y, x) for y, x in coords]  # (row, col) → (x, y) 변환
 
 
+def evaluate_configuration(image, initial_center, size, angle, dx, dy):
+    center = (initial_center[0] + dx, initial_center[1] + dy)
+    rotated_rect = ((center), size, angle)
+
+    # Get the box points (corners of the rotated rectangle)
+    box = cv2.boxPoints(rotated_rect)
+    box = np.int32(box)
+
+    # Precompute the mask shape for this configuration
+    mask = np.zeros_like(image)
+    cv2.polylines(mask, [box], isClosed=True, color=255, thickness=11)
+
+    # Perform bitwise AND to get the white pixels inside the rotated rectangle
+    masked_image = cv2.bitwise_and(image, image, mask=mask)
+
+    # Count the number of white pixels using cv2.countNonZero (faster than np.argwhere)
+    total = cv2.countNonZero(masked_image)
+    return total, center, angle, box
+
+
+def process_configuration(config, image, initial_center, size):
+    return evaluate_configuration(image, initial_center, size, *config)
+
+
 def find_optimal_rectangle(
     image, initial_center, size, angle_range=(3, 13), center_range=(-50, 50), step=5
 ):
@@ -26,34 +54,33 @@ def find_optimal_rectangle(
     best_angle = None
     best_box = None
 
-    # Search over angles and centers
-    for angle in range(angle_range[0], angle_range[1], step):
-        for dx in range(center_range[0], center_range[1], step):
-            for dy in range(center_range[0], center_range[1], step):
+    # Use ProcessPoolExecutor for parallel computation
+    with ProcessPoolExecutor() as executor:
+        # Prepare the configurations to evaluate
+        configurations = [
+            (angle, dx, dy)
+            for angle in range(angle_range[0], angle_range[1], step)
+            for dx in range(center_range[0], center_range[1], step)
+            for dy in range(center_range[0], center_range[1], step)
+        ]
 
-                center = (initial_center[0] + dx, initial_center[1] + dy)
-                rotated_rect = ((center), size, angle)
+        # Evaluate configurations in parallel using multiprocessing
+        results = executor.map(
+            process_configuration,
+            configurations,
+            [image] * len(configurations),
+            [initial_center] * len(configurations),
+            [size] * len(configurations),
+        )
 
-                # Get the box points (corners of the rotated rectangle)
-                box = cv2.boxPoints(rotated_rect)
-                box = np.int32(box)
-
-                # Mask the image to get white pixels inside the rectangle
-                mask = np.zeros_like(image)
-                cv2.polylines(mask, [box], isClosed=True, color=255, thickness=11)
-
-                # Calculate the total white pixels inside the rotated rectangle
-                masked_image = cv2.bitwise_and(image, image, mask=mask)
-
-                total = cv2.countNonZero(masked_image)
-                print(f"Angle: {angle}, dx: {dx}, dy: {dy}, Total: {total}")
-
-                # Update if we find a better (lower) total
-                if total > best_total:
-                    best_total = total
-                    best_center = center
-                    best_angle = angle
-                    best_box = box
+        # Update the best configuration based on the results
+        for total, center, angle, box in results:
+            print(f"Angle: {angle}, Center: {center} Total: {total}")
+            if total > best_total:
+                best_total = total
+                best_center = center
+                best_angle = angle
+                best_box = box
 
     return best_center, best_angle, best_box, best_total
 
@@ -80,5 +107,9 @@ if __name__ == "__main__":
     cv2.polylines(shape_image, [best_box], isClosed=True, color=255, thickness=11)
 
     print(f"Total white pixels in the rotated rectangle: {best_total}")
+    end_time = time.time()
     plt.imshow(shape_image, cmap="gray")
     plt.show()
+
+    elapsed_time = end_time - start_time
+    print(f"작업에 걸린 시간: {elapsed_time} 초")
