@@ -96,11 +96,16 @@ if __name__ == "__main__":
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     shape_image = detect_lines(img_gray)
 
-    initial_center = (2119, 1510)
+    initial_center = (shape_image.shape[1] // 2, shape_image.shape[0] // 2)
     size = (1686, 1378)
 
     best_center, best_angle, best_box, best_total = find_optimal_rectangle(
-        shape_image, initial_center, size
+        shape_image,
+        initial_center,
+        size,
+        angle_range=(-10, 10),
+        center_range=(-initial_center[0], initial_center[0]),
+        step=5,
     )
 
     # Draw the rotated rectangle
