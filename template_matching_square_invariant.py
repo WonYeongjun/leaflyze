@@ -6,7 +6,6 @@ import matplotlib
 from matplotlib import pyplot, patches
 
 from invariant_match_template_for_square import invariant_match_template
-from get_point_of_interest import get_point_of_interest
 from simplification import morphology_diff
 from shape_detect import detect_lines
 
