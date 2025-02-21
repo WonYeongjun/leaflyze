@@ -9,8 +9,8 @@
   "pc_watching_folder" : "C:/Users/UserK/Desktop/raw/",
   "main_code_name" : "calibration_marker_detector.py",
   "ArUco_list": [12, 18, 27, 5],
-  "ArUco_width": 4200,
-  "ArUco_height": 2970,
+  "ArUco_width": 4520,
+  "ArUco_height": 2790,
   "matrix_coef": [
     [1.90296778e+03, 0.00000000e+00, 9.62538876e+02],
     [0.00000000e+00, 1.90259449e+03, 6.99587164e+02],

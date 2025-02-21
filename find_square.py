@@ -104,7 +104,7 @@ if __name__ == "__main__":
         initial_center,
         size,
         angle_range=(-10, 10),
-        center_range=(-initial_center[0], initial_center[0]),
+        center_range=(-100, 100),
         step=5,
     )
 

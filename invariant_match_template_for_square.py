@@ -19,6 +19,21 @@ def _scale_image(image, percent):
     return result
 
 
+def make_rect(size, angle):
+    mask = np.zeros((int(size[1] * 1.2), int(size[0] * 1.2)), dtype=np.uint8)
+    center = (size[0] * 1.2 // 2, size[1] * 1.2 // 2)
+    rotated_rect = ((center), size, angle)
+
+    # Get the box points (corners of the rotated rectangle)
+    box = cv2.boxPoints(rotated_rect)
+    box = np.int32(box)
+
+    # Precompute the mask shape for this configuration
+    cv2.polylines(mask, [box], isClosed=True, color=255, thickness=31)
+
+    return mask
+
+
 def invariant_match_template(
     grayimage,
     graytemplate,
@@ -33,9 +48,7 @@ def invariant_match_template(
     end = scale_range[1]
     scale_angle_combine = []
     for i in range(start, end + 1, scale_interval):
-        for j in range(
-            i - (scale_interval * 2), i + (scale_interval * 3), scale_interval
-        ):
+        for j in range(i, i + (scale_interval), scale_interval):
             for k in range(rot_range[0], rot_range[1] + 1, rot_interval):
                 scale_angle_combine.append([i, j, k])
 
@@ -43,10 +56,10 @@ def invariant_match_template(
     all_points = []
 
     def process_template(scale_and_angle):
-        processed_template = _scale_image(graytemplate, scale_and_angle)
+
         processed_mask = _scale_image(mask, scale_and_angle)
         result = cv2.matchTemplate(
-            grayimage, processed_template, cv2.TM_CCOEFF_NORMED, mask=processed_mask
+            grayimage, graytemplate, cv2.TM_CCORR, mask=processed_mask
         )
         ys, xs = np.where(result >= matched_thresh)
         matches = []
