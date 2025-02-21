@@ -7,7 +7,7 @@ from matplotlib import pyplot, patches
 
 from invariant_match_template_for_square import invariant_match_template
 from simplification import morphology_diff
-from shape_detect import detect_lines
+from shape_detect import line_detector
 
 start_time = time.time()
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     img_bgr = cv2.imread(image_path)
     # img_bgr = get_point_of_interest(img_bgr)
     img_gray, _, _ = morphology_diff(img_bgr)
-    shape_image = detect_lines(img_gray)
+    shape_image = line_detector(img_gray)
 
     img_rgb = cv2.cvtColor(shape_image, cv2.COLOR_GRAY2RGB)
     width = 1800  # 1686 #TODO: Change this to the actual size of the square

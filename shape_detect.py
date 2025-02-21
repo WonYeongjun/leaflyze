@@ -7,10 +7,10 @@ from simplification import morphology_diff
 import matplotlib.pyplot as plt
 
 
-def detect_shape(img_gray):
-    drawing_paper = np.zeros_like(img_gray)
+def Hough(edges):
+    drawing_paper = np.zeros_like(edges)
     lines = cv2.HoughLinesP(
-        img_gray, 1, np.pi / 180, threshold=50, minLineLength=20, maxLineGap=10
+        edges, 1, np.pi / 180, threshold=100, minLineLength=30, maxLineGap=10
     )
     if lines is not None:
         for line in lines:
@@ -19,11 +19,12 @@ def detect_shape(img_gray):
     return drawing_paper
 
 
-def contours(img_gray):
+def RANSAC(edges):
+    edges = cv2.blur(edges, (5, 5))
 
-    contours, _ = cv2.findContours(img_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    drawing_paper = np.zeros_like(img_gray)
+    drawing_paper = np.zeros_like(edges)
 
     for contour in contours:
         points = contour.squeeze()  # (N, 1, 2) -> (N, 2)
@@ -52,7 +53,7 @@ def contours(img_gray):
     return drawing_paper
 
 
-def detect_lines(img_gray):
+def line_detector(img_gray):
     # 선 감지기 생성
     detector = cv2.createLineSegmentDetector()
 
@@ -70,6 +71,45 @@ def detect_lines(img_gray):
     return output_img_binary_inversed
 
 
+def detect_SED(img_bgr):
+    model = "model.yml.gz"  # 미리 학습된 모델 필요
+    edge_detector = cv2.ximgproc.createStructuredEdgeDetection(model)
+    edges = edge_detector.detectEdges(np.float32(img_bgr) / 255.0)
+    edges = edges * 255
+    edges = edges.astype(np.uint8)
+    return edges
+
+
+def sobel(img):
+    # Sobel 필터 적용 (X, Y 방향)
+    sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+    sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+    sobel = cv2.magnitude(sobel_x, sobel_y)  # 크기 계산
+
+    sobel = np.uint8(sobel)  # 정수형 변환
+    return sobel
+
+
+def laplacian(img):
+    laplacian = cv2.Laplacian(img, cv2.CV_64F)
+    laplacian = np.uint8(np.abs(laplacian))  # 절댓값 변환
+    return laplacian
+
+
+def scharr(img):
+    scharr_x = cv2.Scharr(img, cv2.CV_64F, 1, 0)
+    scharr_y = cv2.Scharr(img, cv2.CV_64F, 0, 1)
+    scharr = cv2.magnitude(scharr_x, scharr_y)
+
+    scharr = np.uint8(scharr)
+    return scharr
+
+
+def canny(img):
+    canny = cv2.Canny(img, 150, 250)
+    return canny
+
+
 if __name__ == "__main__":
     image_path = "C:/Users/UserK/Desktop/fin/purple_back.jpg"
     image = cv2.imread(image_path)
@@ -77,8 +117,8 @@ if __name__ == "__main__":
     img_gray, _, _ = morphology_diff(image)
     # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    line_image = detect_lines(img_gray)
-    shape_image = detect_shape(line_image)
+    line_image = line_detector(img_gray)
+    shape_image = Hough(line_image)
     # contour_image = contours(line_image)
     cv2.imwrite("output_image.png", line_image)
     plt.imshow(line_image, cmap="gray")

@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -9,21 +10,33 @@ def morphology_diff(image):
     difference_with_morph = cv2.absdiff(image, img_morphed)
     difference_with_morph_gray = cv2.cvtColor(difference_with_morph, cv2.COLOR_BGR2GRAY)
     difference_with_morph_gray_inversed = 255 - difference_with_morph_gray
-    difference_with_morph_gray_inversed[difference_with_morph_gray_inversed == 0] = 255
+
     blurred = cv2.GaussianBlur(difference_with_morph_gray_inversed, (9, 9), 10)
     contour_emphasized = cv2.addWeighted(
         difference_with_morph_gray_inversed, 1.5, blurred, -0.5, 0
     )
 
-    # threshold_value = 210  # You can change this value to set your own threshold
-    # _, img_binary = cv2.threshold(
-    #     contour_emphasized, threshold_value, 255, cv2.THRESH_BINARY
-    # )
-    img_binary = cv2.threshold(
-        contour_emphasized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-    )[1]
+    return difference_with_morph_gray_inversed, contour_emphasized
 
-    return difference_with_morph_gray_inversed, contour_emphasized, img_binary
+
+def morph(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    kernel = np.ones((5, 5), np.uint8)
+    morph_img = cv2.morphologyEx(image_gray, cv2.MORPH_GRADIENT, kernel)
+
+    return morph_img
+
+
+def blur(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blur_img = cv2.GaussianBlur(image_gray, (5, 5), 0)
+
+    return blur_img
+
+
+def nothing(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return image_gray
 
 
 if __name__ == "__main__":

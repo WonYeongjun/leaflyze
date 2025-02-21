@@ -7,7 +7,7 @@ from matplotlib import pyplot, patches
 from invariant_match_template import invariant_match_template
 from get_point_of_interest import get_point_of_interest
 from simplification import morphology_diff
-from shape_detect import detect_shape
+from shape_detect import Hough
 
 start_time = time.time()
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     img_bgr = cv2.imread(image_path)
     img_bgr = get_point_of_interest(img_bgr)
     img_gray, _, _ = morphology_diff(img_bgr)
-    shape_image = detect_shape(img_gray)
+    shape_image = Hough(img_gray)
 
     img_rgb = cv2.cvtColor(shape_image, cv2.COLOR_GRAY2RGB)
     img_rgb = img_rgb * 255

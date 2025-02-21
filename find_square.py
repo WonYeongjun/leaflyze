@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
 from simplification import morphology_diff
-from shape_detect import detect_lines
+from shape_detect import line_detector
 
 start_time = time.time()
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # img_bgr = get_point_of_interest(img_bgr)
     img_gray, _, _ = morphology_diff(img_bgr)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    shape_image = detect_lines(img_gray)
+    shape_image = line_detector(img_gray)
 
     initial_center = (shape_image.shape[1] // 2, shape_image.shape[0] // 2)
     size = (1686, 1378)
