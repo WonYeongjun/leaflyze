@@ -19,9 +19,9 @@ def make_rect(size, angle):
 
 if __name__ == "__main__":
     # 사각형의 너비와 높이를 사용자로부터 입력받음
-    width = 500  # 예시 너비
-    height = 200  # 예시 높이
-    angle = 10
+    width = 1800  # 예시 너비
+    height = 1300  # 예시 높이
+    angle = 0
 
     output_image = make_rect((width, height), angle)
     cv2.imwrite("rectangle_with_border.png", output_image)
