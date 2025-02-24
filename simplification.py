@@ -4,13 +4,12 @@ import matplotlib.pyplot as plt
 
 
 def morphology_diff(image):
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (101, 101))
     img_morphed = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
     difference_with_morph = cv2.absdiff(image, img_morphed)
     difference_with_morph_gray = cv2.cvtColor(difference_with_morph, cv2.COLOR_BGR2GRAY)
     difference_with_morph_gray_inversed = 255 - difference_with_morph_gray
-
     blurred = cv2.GaussianBlur(difference_with_morph_gray_inversed, (9, 9), 10)
     contour_emphasized = cv2.addWeighted(
         difference_with_morph_gray_inversed, 1.5, blurred, -0.5, 0
