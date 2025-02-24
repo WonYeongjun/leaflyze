@@ -74,9 +74,11 @@ def line_detector(img_gray):
 def detect_SED(img_bgr):
     model = "model.yml.gz"  # 미리 학습된 모델 필요
     edge_detector = cv2.ximgproc.createStructuredEdgeDetection(model)
+    img_bgr = cv2.resize(img_bgr, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
     edges = edge_detector.detectEdges(np.float32(img_bgr) / 255.0)
     edges = edges * 255
     edges = edges.astype(np.uint8)
+    edges = cv2.resize(edges, None, fx=0.5, fy=0.5)
     return edges
 
 
