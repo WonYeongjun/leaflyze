@@ -1,51 +1,33 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-from get_point_of_interest import get_point_of_interest
-from simplification import morphology_diff
 
 
-def extract_sift_features(img):
+def detect_marker_sift(template_path, image_path):
+    """SIFT를 이용해 마커를 찾고 RANSAC으로 정제된 매칭 결과를 출력"""
 
-    # SIFT 객체 생성 (파라미터 튜닝)
-    sift = cv2.SIFT_create(
-        nOctaveLayers=7, contrastThreshold=0.1, edgeThreshold=20, sigma=1.9
-    )
+    # 1️⃣ 이미지 로드
+    template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-    # 특징점과 디스크립터 계산
-    keypoints, descriptors = sift.detectAndCompute(img, None)
+    # 2️⃣ SIFT 객체 생성
+    sift = cv2.SIFT_create()
 
-    # 특징점 그리기
-    img_with_keypoints = cv2.drawKeypoints(
-        img, keypoints, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
-    )
+    # 3️⃣ 특징점 및 디스크립터 검출
+    keypoints_template, descriptors_template = sift.detectAndCompute(template, None)
+    keypoints_image, descriptors_image = sift.detectAndCompute(image, None)
 
-    return img_with_keypoints, keypoints, descriptors
+    # 4️⃣ BFMatcher로 특징점 매칭
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(descriptors_template, descriptors_image, k=2)
 
+    # 5️⃣ Lowe’s Ratio Test 적용 (잘못된 매칭 제거)
+    good_matches = [m for m, n in matches if m.distance < 1 * n.distance]
 
-def match_sift_features(descriptors_template, descriptors_image):
-    """SIFT 특징점 매칭 (FLANN과 Lowe's ratio test 적용)"""
-    FLANN_INDEX_KDTREE = 1
-    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
-    search_params = dict(checks=50)
-    flann = cv2.FlannBasedMatcher(index_params, search_params)
+    if len(good_matches) < 4:
+        print(f"⚠ 매칭된 특징점이 부족합니다. ({len(good_matches)}개)")
+        return
 
-    # FLANN 매칭 수행
-    matches = flann.knnMatch(descriptors_template, descriptors_image, k=4)
-
-    # Lowe's ratio test: 비율 검사를 통해 잘못된 매칭 제거
-    print(len(matches))
-    good_matches = []
-    for m, n, o, p in matches:
-        if m.distance < 250:
-            good_matches.extend([m, n, o, p])
-    print(f"정답{len(good_matches)}")
-
-    return good_matches
-
-
-def apply_ransac_filter(keypoints_template, keypoints_image, good_matches):
-    """RANSAC 후처리를 통해 잘못된 매칭을 제거"""
+    # 6️⃣ RANSAC을 이용한 Homography 계산 및 이상치 제거
     src_pts = np.float32(
         [keypoints_template[m.queryIdx].pt for m in good_matches]
     ).reshape(-1, 1, 2)
@@ -53,66 +35,47 @@ def apply_ransac_filter(keypoints_template, keypoints_image, good_matches):
         [keypoints_image[m.trainIdx].pt for m in good_matches]
     ).reshape(-1, 1, 2)
 
-    # Homography 찾기 및 RANSAC 적용
-    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 15.0)
+    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
 
-    # 잘못된 매칭을 제외한 좋은 매칭만 반환
+    if M is None:
+        print("⚠ Homography 행렬을 찾을 수 없습니다. 매칭된 특징점이 부족합니다.")
+        return
+
     good_matches_filtered = [
         good_matches[i] for i in range(len(good_matches)) if mask[i]
     ]
 
-    return good_matches_filtered, M
+    # 7️⃣ 마커 영역을 사각형으로 표시
+    h, w = template.shape
+    pts = np.float32([[0, 0], [w, 0], [w, h], [0, h]]).reshape(-1, 1, 2)
+    dst = cv2.perspectiveTransform(pts, M)  # 변환된 좌표 계산
 
-
-def find_multiple_markers(
-    image, template_binary, descriptors_template, keypoints_template
-):
-    """여러 마커를 찾는 함수"""
-    result_img, keypoints, descriptors = extract_sift_features(image)
-
-    # 특징점 매칭 수행
-    good_matches = match_sift_features(descriptors_template, descriptors)
-
-    # RANSAC 후처리
-    good_matches_filtered, M = apply_ransac_filter(
-        keypoints_template, keypoints, good_matches
+    # 원본 이미지에 사각형을 그려 마커 위치 표시
+    image_with_box = cv2.polylines(
+        cv2.cvtColor(image, cv2.COLOR_GRAY2BGR),
+        [np.int32(dst)],
+        isClosed=True,
+        color=(0, 255, 0),
+        thickness=3,
     )
 
-    # 매칭된 특징점들 시각화
-    matched_image = cv2.drawMatches(
-        template_binary,
+    # 8️⃣ 매칭 결과 시각화
+    result = cv2.drawMatches(
+        template,
         keypoints_template,
-        image,
-        keypoints,
-        good_matches,
+        image_with_box,
+        keypoints_image,
+        good_matches_filtered,
         None,
-        flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS,
+        flags=2,
     )
 
-    # 결과 이미지를 화면에 출력
-    plt.figure(figsize=(10, 5))
-    plt.imshow(matched_image)
-    plt.title("SIFT Multi-Template Matching")
-    plt.show()
-
-    # 여기에 추가로 다중 마커를 식별하는 방법 (예: 컨투어, Hough 변환 등) 추가
-    # 예: 특정 패턴을 인식하거나, 마커들을 연결하여 마커 위치 파악
+    # 9️⃣ 결과 출력
+    cv2.imwrite("./output/matched_result.jpg", result)
+    cv2.imshow("Matched Features", result)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
-if __name__ == "__main__":
-    # 이미지 파일 경로
-    image_path = "./image/fin_cal_img_one_marker.jpg"  # 예: "sample.jpg"
-    template_path = "./image/marker_4.png"
-    # 이미지 및 템플릿 로드
-    image = cv2.imread(image_path)
-    image = get_point_of_interest(image)
-    # image, _ = morphology_diff(image)
-    template = cv2.imread(template_path)
-
-    # 템플릿에서 SIFT 특징점 및 기술자 추출
-    result_img_template, keypoints_template, descriptors_template = (
-        extract_sift_features(template)
-    )
-
-    # 타깃 이미지에서 다중 마커 찾기
-    find_multiple_markers(image, template, descriptors_template, keypoints_template)
+# 예제 실행
+detect_marker_sift("./image/marker_4.png", "./image/fin_cal_img_one_marker.jpg")
