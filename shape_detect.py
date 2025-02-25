@@ -5,6 +5,10 @@ from sklearn.linear_model import RANSACRegressor
 
 from simplification import morphology_diff
 import matplotlib.pyplot as plt
+from line_merge import merge_all_segments
+import sys
+
+sys.setrecursionlimit(2000)  # 🔥 재귀 호출 한도 증가
 
 
 def Hough(edges):
@@ -53,7 +57,47 @@ def RANSAC(edges):
     return drawing_paper
 
 
+def get_lines_not_in_merged(merged_lines, lines):
+    # merged_lines와 lines을 (N, 4) 형태로 numpy 배열로 변환
+    merged_lines = np.array(merged_lines)
+    lines = np.array(lines)
+
+    # 각 선분이 lines에 속하지 않는지 확인 (벡터화)
+    # merged_lines와 lines의 각 선분을 비교하여 일치하지 않는 선분을 찾음
+    merged_lines_set = set(map(tuple, merged_lines.tolist()))
+    lines_set = set(map(tuple, lines.tolist()))
+
+    non_matching_lines = np.array(
+        [line for line in merged_lines if tuple(line) not in lines_set]
+    )
+
+    return non_matching_lines
+
+
 def line_detector(img_gray):
+    # 선 감지기 생성
+    detector = cv2.createLineSegmentDetector()
+    # 선 감지
+    lines, _, _, _ = detector.detect(img_gray)
+    lines = lines.squeeze()
+    print(len(lines))
+    merged_lines = merge_all_segments(lines)
+    # 감지된 선 그리기
+    drawing_paper = np.ones_like(img_gray) * 255
+    print("그림 시작")
+    print(len(merged_lines))
+    for line in merged_lines:
+        x1, y1, x2, y2 = line
+        cv2.line(drawing_paper, (int(x1), int(y1)), (int(x2), int(y2)), 0, 2)
+    output_img = drawing_paper
+    output_img_binary = cv2.threshold(
+        output_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )[1]
+    output_img_binary_inversed = 255 - output_img_binary
+    return output_img_binary_inversed
+
+
+def line_detector_without_merge(img_gray):
     # 선 감지기 생성
     detector = cv2.createLineSegmentDetector()
 
@@ -113,17 +157,16 @@ def canny(img):
 
 
 if __name__ == "__main__":
-    image_path = "C:/Users/UserK/Desktop/fin/purple_back.jpg"
+    file_name = "black2"
+    image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
     image = cv2.imread(image_path)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    img_gray, _, _ = morphology_diff(image)
+    img_gray, _ = morphology_diff(image)
     # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     line_image = line_detector(img_gray)
-    shape_image = Hough(line_image)
     # contour_image = contours(line_image)
-    cv2.imwrite("output_image.png", line_image)
+    # cv2.imwrite("output_image.png", line_image)
     plt.imshow(line_image, cmap="gray")
     plt.title("Detected Lines")
-    plt.axis("off")
     plt.show()

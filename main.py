@@ -5,9 +5,9 @@ import cv2
 import matplotlib.pyplot as pyplot
 
 from simplification import morphology_diff
-from shape_detect import line_detector, detect_SED
-from outline import center_emphasize
+from shape_detect import line_detector, detect_SED, line_detector_without_merge
 from get_point_of_interest import get_point_of_interest
+from get_contours_of_honeycomb import masking_honeycomb
 
 
 def make_rect(size, angle):
@@ -32,28 +32,30 @@ class PointInfo:
 
 
 if __name__ == "__main__":
-
-    file_name = "white4"
+    start_time = time.time()
+    file_name = "pink1_rot"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     img_bgr = cv2.imread(image_path)
-    img_bgr = get_point_of_interest(img_bgr)
-    _, img_gray = morphology_diff(img_bgr)
-    shape_image = line_detector(img_gray)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    img_bgr = masking_honeycomb(img_bgr)
+    # img_bgr = get_point_of_interest(img_bgr)
+    _, img_gray = morphology_diff(img_bgr)
+    shape_image = line_detector_without_merge(img_gray)
+    kernel = np.ones((5, 5), np.uint8)
+    shape_image = cv2.dilate(shape_image, kernel, iterations=1)
+
     # shape_image = detect_SED(img_bgr)
-    # shape_image = center_emphasize(shape_image)
     # shape_image = cv2.threshold(
     #     shape_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     # )[1]
-    pyplot.imshow(shape_image, cmap="gray")
-    pyplot.show()
+    # pyplot.imshow(shape_image, cmap="gray")
+    # pyplot.show()
 
     result_rough = []
     width = 1000  # 1686 #TODO: Change this to the actual size of the square
     height = 1000  # 1378 #TODO: Change this to the actual size of the square
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
-    start_time = time.time()
 
     for angle in range(-350, 351, 25):
         template_mask = make_rect((width, height), angle / 10)
