@@ -2,10 +2,12 @@ import time
 
 import numpy as np
 import cv2
-
+import matplotlib.pyplot as pyplot
 
 from simplification import morphology_diff
-from shape_detect import line_detector
+from shape_detect import line_detector, detect_SED
+from outline import center_emphasize
+from get_point_of_interest import get_point_of_interest
 
 
 def make_rect(size, angle):
@@ -31,22 +33,29 @@ class PointInfo:
 
 if __name__ == "__main__":
 
-    file_name = "purple_back"
+    file_name = "white4"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     img_bgr = cv2.imread(image_path)
-
+    img_bgr = get_point_of_interest(img_bgr)
     _, img_gray = morphology_diff(img_bgr)
-    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     shape_image = line_detector(img_gray)
+    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    # shape_image = detect_SED(img_bgr)
+    # shape_image = center_emphasize(shape_image)
+    # shape_image = cv2.threshold(
+    #     shape_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    # )[1]
+    pyplot.imshow(shape_image, cmap="gray")
+    pyplot.show()
 
     result_rough = []
-    width = 1800  # 1686 #TODO: Change this to the actual size of the square
-    height = 1300  # 1378 #TODO: Change this to the actual size of the square
+    width = 1000  # 1686 #TODO: Change this to the actual size of the square
+    height = 1000  # 1378 #TODO: Change this to the actual size of the square
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
     start_time = time.time()
 
-    for angle in range(-300, 301, 25):
+    for angle in range(-350, 351, 25):
         template_mask = make_rect((width, height), angle / 10)
         hotmap = cv2.matchTemplate(
             shape_image, template, cv2.TM_CCORR, mask=template_mask
@@ -78,7 +87,7 @@ if __name__ == "__main__":
     point_info_rough.sort(key=lambda point: point.angle)
     print(point_info_rough[0].angle, point_info_rough[1].angle)
 
-    for angle in range(point_info_rough[0].angle, point_info_rough[1].angle, 1):
+    for angle in range(point_info_rough[0].angle, point_info_rough[1].angle + 1, 1):
         template_mask = make_rect((width, height), angle / 10)
         hotmap = cv2.matchTemplate(
             shape_image, template, cv2.TM_CCORR, mask=template_mask
@@ -114,9 +123,9 @@ if __name__ == "__main__":
     box = cv2.boxPoints(rotated_rect)
     box = np.int32(box)
 
-    cv2.polylines(shape_image, [box], isClosed=True, color=255, thickness=31)
+    cv2.polylines(img_rgb, [box], isClosed=True, color=(255, 0, 0), thickness=5)
 
-    combined_image = np.hstack((img_rgb, cv2.cvtColor(shape_image, cv2.COLOR_GRAY2RGB)))
+    combined_image = np.hstack((cv2.cvtColor(shape_image, cv2.COLOR_GRAY2RGB), img_rgb))
 
     cv2.imwrite(
         f"./output/back/{file_name}_result.png",
