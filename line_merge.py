@@ -41,10 +41,6 @@ def find_connected_segments(segments, distance_threshold=30, angle_threshold=10.
                 neighbor, angle_j = segment_info[(x_near, y_near)]
                 angle_new = calculate_angle(x1, y1, x_near, y_near)
                 r = np.linalg.norm([x1 - x_near, y1 - y_near])
-
-                distance = np.abs(
-                    r * np.sin(np.radians(angle_new - angle_i))  # ✅ 거리 계산
-                )
                 # ✅ 거리 & 각도 차이 조건 추가
                 if (
                     neighbor != i
@@ -65,9 +61,6 @@ def find_connected_segments(segments, distance_threshold=30, angle_threshold=10.
                 neighbor, angle_j = segment_info[(x_near, y_near)]
                 angle_new = calculate_angle(x2, y2, x_near, y_near)
                 r = np.linalg.norm([x2 - x_near, y2 - y_near])
-                distance = np.abs(
-                    r * np.sin(np.radians(angle_new - angle_i))  # ✅ 거리 계산
-                )
                 if (
                     neighbor != i
                     and r < distance_threshold

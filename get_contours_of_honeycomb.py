@@ -2,10 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-from simplification import morphology_diff
 from shape_detect import line_detector, detect_SED
-from outline import center_emphasize
-from get_point_of_interest import get_point_of_interest
 
 
 def masking_honeycomb(image):
@@ -20,21 +17,12 @@ def masking_honeycomb(image):
 
     contours, _ = cv2.findContours(morph_image, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     top_10_contours = sorted(contours, key=cv2.contourArea, reverse=True)[:2]
-    colors = [
-        (255, 0, 0),
-        (0, 255, 0),
-        (0, 0, 255),
-        (255, 255, 0),
-        (255, 0, 255),
-        (0, 255, 255),
-        (128, 0, 0),
-        (0, 128, 0),
-        (0, 0, 128),
-        (128, 128, 0),
-    ]
-    mask = np.ones_like(image[:, :, 0]) * 255
-
-    cv2.drawContours(mask, top_10_contours[:2], -1, 0, thickness=cv2.FILLED)
+    mask1 = np.zeros_like(image[:, :, 0])
+    mask2 = np.zeros_like(image[:, :, 0])
+    cv2.drawContours(mask1, [top_10_contours[0]], -1, 255, thickness=cv2.FILLED)
+    cv2.drawContours(mask2, [top_10_contours[1]], -1, 255, thickness=cv2.FILLED)
+    mask = cv2.bitwise_xor(mask1, mask2)
+    mask = cv2.bitwise_not(mask)
 
     # for i, contour in enumerate(top_10_contours):
     #     cv2.drawContours(image, [contour], -1, colors[i % len(colors)], 2)
@@ -43,10 +31,9 @@ def masking_honeycomb(image):
 
 
 if __name__ == "__main__":
-    file_name = "white2_rot"
+    file_name = "pink1"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
-    # 6. 이미지 로드
     image = cv2.imread(image_path)
     result_image = masking_honeycomb(image)
     plt.imshow(cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
