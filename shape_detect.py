@@ -80,11 +80,34 @@ def line_detector(img_gray):
     # 선 감지
     lines, _, _, _ = detector.detect(img_gray)
     lines = lines.squeeze()
-    merged_lines = np.array(merge_all_segments(lines))
+    print(len(lines))
+    merged_lines = merge_all_segments(lines)
     # 감지된 선 그리기
     drawing_paper = np.ones_like(img_gray) * 255
-
+    print("그림 시작")
+    print(len(merged_lines))
+    for line in merged_lines:
+        x1, y1, x2, y2 = line
+        cv2.line(drawing_paper, (int(x1), int(y1)), (int(x2), int(y2)), 0, 2)
     output_img = drawing_paper
+    output_img_binary = cv2.threshold(
+        output_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+    )[1]
+    output_img_binary_inversed = 255 - output_img_binary
+    return output_img_binary_inversed
+
+
+def line_detector_without_merge(img_gray):
+    # 선 감지기 생성
+    detector = cv2.createLineSegmentDetector()
+
+    # 선 감지
+    lines = detector.detect(img_gray)[0]
+    print(lines[0, 0])
+    # 감지된 선 그리기
+    drawing_paper = np.ones_like(img_gray) * 255
+    output_img = detector.drawSegments(drawing_paper, lines)
+    output_img = cv2.cvtColor(output_img, cv2.COLOR_BGR2GRAY)
     output_img_binary = cv2.threshold(
         output_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )[1]
@@ -134,7 +157,7 @@ def canny(img):
 
 
 if __name__ == "__main__":
-    file_name = "black1"
+    file_name = "black2"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
     image = cv2.imread(image_path)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)

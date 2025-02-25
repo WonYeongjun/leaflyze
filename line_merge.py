@@ -13,7 +13,7 @@ def create_kd_tree(points):
     return KDTree(points)
 
 
-def find_connected_segments(segments, distance_threshold=50, angle_threshold=10.0):
+def find_connected_segments(segments, distance_threshold=30, angle_threshold=10.0):
     """선분 간 거리와 각도를 고려하여 연결된 선분 찾기"""
     points = []
     segment_info = {}
@@ -39,11 +39,19 @@ def find_connected_segments(segments, distance_threshold=50, angle_threshold=10.
             x_near, y_near = points[idx]
             if (x_near, y_near) in segment_info:
                 neighbor, angle_j = segment_info[(x_near, y_near)]
+                angle_new = calculate_angle(x1, y1, x_near, y_near)
+                r = np.linalg.norm([x1 - x_near, y1 - y_near])
+
+                distance = np.abs(
+                    r * np.sin(np.radians(angle_new - angle_i))  # ✅ 거리 계산
+                )
                 # ✅ 거리 & 각도 차이 조건 추가
                 if (
                     neighbor != i
-                    and np.linalg.norm([x1 - x_near, y1 - y_near]) < distance_threshold
+                    and r < distance_threshold
+                    and abs(angle_i - angle_new) < 3 * angle_threshold
                 ):
+                    # print(angle_i, angle_j, angle_new, abs(angle_i - angle_j))
                     if abs(angle_i - angle_j) < angle_threshold:
                         adj_list[i].append(neighbor)
 
@@ -55,10 +63,17 @@ def find_connected_segments(segments, distance_threshold=50, angle_threshold=10.
             x_near, y_near = points[idx]
             if (x_near, y_near) in segment_info:
                 neighbor, angle_j = segment_info[(x_near, y_near)]
+                angle_new = calculate_angle(x2, y2, x_near, y_near)
+                r = np.linalg.norm([x2 - x_near, y2 - y_near])
+                distance = np.abs(
+                    r * np.sin(np.radians(angle_new - angle_i))  # ✅ 거리 계산
+                )
                 if (
                     neighbor != i
-                    and np.linalg.norm([x2 - x_near, y2 - y_near]) < distance_threshold
+                    and r < distance_threshold
+                    and abs(angle_i - angle_new) < 3 * angle_threshold
                 ):
+                    # print(angle_i, angle_j, angle_new, abs(angle_i - angle_j))
                     if abs(angle_i - angle_j) < angle_threshold:
                         adj_list[i].append(neighbor)
 
@@ -86,6 +101,8 @@ def merge_segments(segments, adj_list):
         if not visited[i]:
             group = []
             dfs(i, adj_list, visited, group)
+            if len(group) == 1:
+                continue
             merged_segment = merge_group(segments, group)
             result.append(merged_segment)
 

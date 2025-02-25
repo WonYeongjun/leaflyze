@@ -33,7 +33,7 @@ class PointInfo:
 
 
 if __name__ == "__main__":
-
+    start_time = time.time()
     file_name = "black1"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
@@ -58,7 +58,6 @@ if __name__ == "__main__":
     width = 1800  # 1686 #TODO: Change this to the actual size of the square
     height = 1300  # 1378 #TODO: Change this to the actual size of the square
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
-    start_time = time.time()
 
     for angle in range(-350, 351, 25):
         template_mask = make_rect((width, height), angle / 10)
