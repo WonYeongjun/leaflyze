@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-def make_rect(size, angle):
+def make_rect(size, angle, thickness=31):
     mask = np.zeros((int(size[1] * 1.2), int(size[0] * 1.2)), dtype=np.uint8)
     center = (size[0] * 1.2 // 2, size[1] * 1.2 // 2)
     rotated_rect = ((center), size, angle)
@@ -12,7 +12,7 @@ def make_rect(size, angle):
     box = np.int32(box)
 
     # Precompute the mask shape for this configuration
-    cv2.polylines(mask, [box], isClosed=True, color=255, thickness=31)
+    cv2.polylines(mask, [box], isClosed=True, color=255, thickness=thickness)
 
     return mask
 

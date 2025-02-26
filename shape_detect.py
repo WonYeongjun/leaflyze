@@ -57,23 +57,6 @@ def RANSAC(edges):
     return drawing_paper
 
 
-def get_lines_not_in_merged(merged_lines, lines):
-    # merged_lines와 lines을 (N, 4) 형태로 numpy 배열로 변환
-    merged_lines = np.array(merged_lines)
-    lines = np.array(lines)
-
-    # 각 선분이 lines에 속하지 않는지 확인 (벡터화)
-    # merged_lines와 lines의 각 선분을 비교하여 일치하지 않는 선분을 찾음
-    merged_lines_set = set(map(tuple, merged_lines.tolist()))
-    lines_set = set(map(tuple, lines.tolist()))
-
-    non_matching_lines = np.array(
-        [line for line in merged_lines if tuple(line) not in lines_set]
-    )
-
-    return non_matching_lines
-
-
 def line_detector(img_gray):
     # 선 감지기 생성
     detector = cv2.createLineSegmentDetector()
@@ -157,14 +140,14 @@ def canny(img):
 
 
 if __name__ == "__main__":
-    file_name = "black2"
+    file_name = "pink1"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
     image = cv2.imread(image_path)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     img_gray, _ = morphology_diff(image)
     # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    line_image = line_detector(img_gray)
+    line_image = line_detector_without_merge(img_gray)
     # contour_image = contours(line_image)
     # cv2.imwrite("output_image.png", line_image)
     plt.imshow(line_image, cmap="gray")

@@ -13,7 +13,7 @@ def create_kd_tree(points):
     return KDTree(points)
 
 
-def find_connected_segments(segments, distance_threshold=30, angle_threshold=10.0):
+def find_connected_segments(segments, distance_threshold=200, angle_threshold=10.0):
     """선분 간 거리와 각도를 고려하여 연결된 선분 찾기"""
     points = []
     segment_info = {}
