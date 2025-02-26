@@ -6,7 +6,7 @@ from matplotlib import pyplot, patches
 
 from invariant_match_template import invariant_match_template
 from get_point_of_interest import get_point_of_interest
-from simplification import morphology_diff_binary
+from simplification import *
 
 start_time = time.time()
 
@@ -30,12 +30,13 @@ if __name__ == "__main__":
 
     img_bgr = cv2.imread(image_path)
     # img_bgr = get_point_of_interest(img_bgr)
-    _, _, img_gray = morphology_diff_binary(img_bgr)
+    img_gray = nothing(img_bgr)
     # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    # threshold_value = 128  # You can change this value to set your own threshold
+    threshold_value = 50  # You can change this value to set your own threshold
     # _, img_gray = cv2.threshold(img_gray, threshold_value, 255, cv2.THRESH_BINARY)
     img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
-
+    pyplot.imshow(img_rgb)
+    pyplot.show()
     template_bgr = cv2.imread("./image/marker_4.png")
     template_bgr = cv2.resize(
         template_bgr, (0, 0), fx=0.9, fy=0.9

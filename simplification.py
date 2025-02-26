@@ -37,7 +37,7 @@ def morphology_diff_binary(image):
 def morph(image):
     image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     kernel = np.ones((5, 5), np.uint8)
-    morph_img = cv2.morphologyEx(image_gray, cv2.MORPH_GRADIENT, kernel)
+    morph_img = cv2.morphologyEx(image_gray, cv2.MORPH_CLOSE, kernel)
 
     return morph_img
 
