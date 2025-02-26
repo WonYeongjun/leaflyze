@@ -27,7 +27,7 @@ def masking_honeycomb(image):
     # for i, contour in enumerate(top_10_contours):
     #     cv2.drawContours(image, [contour], -1, colors[i % len(colors)], 2)
     result_image = cv2.bitwise_and(image, image, mask=mask)
-    return result_image
+    return result_image, mask
 
 
 if __name__ == "__main__":
