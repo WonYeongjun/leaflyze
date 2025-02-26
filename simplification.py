@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 def morphology_diff(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (101, 101))
     img_morphed = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+    plt.imshow(img_morphed, cmap="gray")
+    plt.show()
 
     difference_with_morph = cv2.absdiff(image, img_morphed)
     difference_with_morph_gray = cv2.cvtColor(difference_with_morph, cv2.COLOR_BGR2GRAY)
@@ -39,29 +41,29 @@ def nothing(image):
 
 
 if __name__ == "__main__":
-
-    img = cv2.imread("C:/Users/UserK/Desktop/fin/fin_purple_img.jpg")
+    file_name = "pink1"
+    image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
+    img = cv2.imread(image_path)
     # img = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     threshold_value = 90  # You can change this value to set your own threshold
-    _, img_2jin = cv2.threshold(img_gray, threshold_value, 255, cv2.THRESH_BINARY)
-    difference_gray, sharp, img_binary = morphology_diff(img)
+    difference_gray, sharp = morphology_diff(img)
 
     plt.figure(figsize=(15, 5))
 
     plt.subplot(1, 3, 1)
     plt.title("Original Image")
-    plt.imshow(cv2.cvtColor(difference_gray, cv2.COLOR_BGR2RGB))
+    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     plt.axis("off")
 
     plt.subplot(1, 3, 2)
     plt.title("Sharped")
-    plt.imshow(cv2.cvtColor(img_2jin, cv2.COLOR_BGR2RGB))
+    plt.imshow(cv2.cvtColor(difference_gray, cv2.COLOR_GRAY2RGB))
     plt.axis("off")
 
     plt.subplot(1, 3, 3)
     plt.title("binary")
-    plt.imshow(img_binary, cmap="gray")
+    plt.imshow(sharp, cmap="gray")
     plt.axis("off")
 
     plt.show()
