@@ -5,7 +5,12 @@ from collections import defaultdict
 
 def calculate_angle(x1, y1, x2, y2):
     """두 점을 연결하는 선의 각도(기울기) 계산 (라디안 -> 도)"""
-    return np.degrees(np.arctan2(y2 - y1, x2 - x1))
+    angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
+    # if angle > 135:
+    #     angle -= 180
+    # elif angle < -45:
+    #     angle += 180
+    return angle
 
 
 def create_kd_tree(points):
@@ -13,7 +18,7 @@ def create_kd_tree(points):
     return KDTree(points)
 
 
-def find_connected_segments(segments, distance_threshold=200, angle_threshold=10.0):
+def find_connected_segments(segments, distance_threshold=50, angle_threshold=10.0):
     """선분 간 거리와 각도를 고려하여 연결된 선분 찾기"""
     points = []
     segment_info = {}
@@ -32,7 +37,7 @@ def find_connected_segments(segments, distance_threshold=200, angle_threshold=10
         angle_i = calculate_angle(x1, y1, x2, y2)
 
         # 🔥 시점과 가까운 점 찾기
-        distances, indices = kd_tree.query([x1, y1], k=5)
+        _, indices = kd_tree.query([x2, y2], k=30)
         for idx in indices:
             if idx >= len(points):
                 continue
@@ -45,14 +50,14 @@ def find_connected_segments(segments, distance_threshold=200, angle_threshold=10
                 if (
                     neighbor != i
                     and r < distance_threshold
-                    and abs(angle_i - angle_new) < 3 * angle_threshold
+                    and abs(angle_i - angle_new) < 2 * angle_threshold
                 ):
                     # print(angle_i, angle_j, angle_new, abs(angle_i - angle_j))
                     if abs(angle_i - angle_j) < angle_threshold:
                         adj_list[i].append(neighbor)
 
         # 🔥 종점과 가까운 점 찾기
-        distances, indices = kd_tree.query([x2, y2], k=5)
+        _, indices = kd_tree.query([x2, y2], k=30)
         for idx in indices:
             if idx >= len(points):
                 continue
@@ -64,7 +69,7 @@ def find_connected_segments(segments, distance_threshold=200, angle_threshold=10
                 if (
                     neighbor != i
                     and r < distance_threshold
-                    and abs(angle_i - angle_new) < 3 * angle_threshold
+                    and abs(angle_i - angle_new) < 2 * angle_threshold
                 ):
                     # print(angle_i, angle_j, angle_new, abs(angle_i - angle_j))
                     if abs(angle_i - angle_j) < angle_threshold:
@@ -94,7 +99,7 @@ def merge_segments(segments, adj_list):
         if not visited[i]:
             group = []
             dfs(i, adj_list, visited, group)
-            if len(group) == 1:
+            if len(group) <= 2:
                 continue
             merged_segment = merge_group(segments, group)
             result.append(merged_segment)
@@ -111,7 +116,7 @@ def merge_group(segments, group):
         group_points.append((x2, y2))
 
     # x 또는 y 기준으로 정렬
-    group_points = sorted(group_points, key=lambda p: (p[0], p[1]))
+    group_points = sorted(group_points, key=lambda p: (p[1], p[0]))
 
     return [
         group_points[0][0],

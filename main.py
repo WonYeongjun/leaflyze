@@ -33,14 +33,15 @@ class PointInfo:
 
 if __name__ == "__main__":
     start_time = time.time()
-    file_name = "pink1"
+    file_name = "black2"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     img_bgr = cv2.imread(image_path)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     img_bgr, mask = masking_honeycomb(img_bgr)
     # img_bgr = get_point_of_interest(img_bgr)
-    img_gray, _, _ = morphology_diff(img_bgr)
+    # _, _, _, _, img_gray, _ = morphology_diff(img_bgr)
+    img_gray = 255 - cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     shape_image = line_detector(img_gray)
 
     kernel = np.ones((5, 5), np.uint8)
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     width = 1800  # 1686 #TODO: Change this to the actual size of the square
     height = 1300  # 1378 #TODO: Change this to the actual size of the square
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
-    for angle in range(-350, 351, 25):
+    for angle in range(0, 351, 25):
         template = make_rect((width, height), angle / 10, 31)
         template = cv2.blur(template, (5, 5))
         template_mask = make_rect((width, height), angle / 10, 51)

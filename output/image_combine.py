@@ -23,14 +23,16 @@ def combine_images_vertically(image_paths, output_path):
 
 # Example usage
 image_paths = [
-    "./output/back/black_back_result.png",
-    "./output/back/white_back_result.png",
-    "./output/back/purple_back_result.png",
+    "./shape_detect_output/black1_combined_output.png",
+    "./shape_detect_output/black2_combined_output.png",
+    "./shape_detect_output/purple1_combined_output.png",
+    "./shape_detect_output/pink1_combined_output.png",
+    "./shape_detect_output/white1_combined_output.png",
 ]
 # image_paths = [
 #     "./back/black_back_result.png",
 #     "./back/white_back_result.png",
 #     "./back/purple_back_result.png",
 # ]
-output_path = "./output/back/all_result.png"
+output_path = "./shape_detect_output/all_combined_output.png"
 combine_images_vertically(image_paths, output_path)

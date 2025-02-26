@@ -16,7 +16,14 @@ def morphology_diff(image):
         difference_with_morph_gray_inversed, 1.5, blurred, -0.5, 0
     )
     sharp_blurred = cv2.GaussianBlur(contour_emphasized, (5, 5), 10)
-    return difference_with_morph_gray_inversed, contour_emphasized, sharp_blurred
+    return (
+        img_eroded,
+        img_morphed,
+        difference_with_morph_gray,
+        difference_with_morph_gray_inversed,
+        contour_emphasized,
+        sharp_blurred,
+    )
 
 
 def morphology_diff_binary(image):
@@ -55,25 +62,64 @@ def nothing(image):
 
 
 if __name__ == "__main__":
-    file_name = "pink1"
+    file_name = "white1"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
     img = cv2.imread(image_path)
     # img = cv2.imread("./image/pink/fin_cal_img_20250207_141129.jpg")
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    difference_gray, sharp, blurred = morphology_diff(img)
+    img_gray = 255 - img_gray
+    (
+        img_eroded,
+        img_morphed,
+        difference_with_morph_gray,
+        difference_with_morph_gray_inversed,
+        contour_emphasized,
+        sharp_blurred,
+    ) = morphology_diff(img)
+    blurred = blur(img)
+    morphed_grad = morph(img)
+    plt.figure(figsize=(25, 10))
 
-    plt.figure(figsize=(15, 5))
-
-    plt.subplot(1, 3, 1)
+    plt.subplot(2, 5, 1)
     plt.title("Original Image")
     plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
-    plt.subplot(1, 3, 2)
-    plt.title("Sharped")
-    plt.imshow(cv2.cvtColor(difference_gray, cv2.COLOR_GRAY2RGB))
+    plt.subplot(2, 5, 2)
+    plt.title("gray")
+    plt.imshow(cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB))
 
-    plt.subplot(1, 3, 3)
-    plt.title("blur")
+    plt.subplot(2, 5, 3)
+    plt.title("eroded")
+    plt.imshow(img_eroded, cmap="gray")
+
+    plt.subplot(2, 5, 4)
+    plt.title("morphed")
+    plt.imshow(img_morphed, cmap="gray")
+
+    plt.subplot(2, 5, 5)
+    plt.title("difference_with_morph_gray")
+    plt.imshow(difference_with_morph_gray, cmap="gray")
+
+    plt.subplot(2, 5, 6)
+    plt.title("difference_with_morph_gray_inversed")
+    plt.imshow(difference_with_morph_gray_inversed, cmap="gray")
+
+    plt.subplot(2, 5, 7)
+    plt.title("contour_emphasized")
+    plt.imshow(contour_emphasized, cmap="gray")
+
+    plt.subplot(2, 5, 8)
+    plt.title("sharp_blurred")
+    plt.imshow(sharp_blurred, cmap="gray")
+
+    plt.subplot(2, 5, 9)
+    plt.title("blurred")
     plt.imshow(blurred, cmap="gray")
 
+    plt.subplot(2, 5, 10)
+    plt.title("morphed_grad")
+    plt.imshow(morphed_grad, cmap="gray")
+
+    plt.tight_layout()
+    plt.savefig(f"./simplification_output/{file_name}_output.png", dpi=300)
     plt.show()

@@ -1,3 +1,5 @@
+import time
+
 import cv2
 import numpy as np
 from sklearn.linear_model import RANSACRegressor
@@ -8,7 +10,7 @@ import matplotlib.pyplot as plt
 from line_merge import merge_all_segments
 import sys
 
-sys.setrecursionlimit(2000)  # 🔥 재귀 호출 한도 증가
+sys.setrecursionlimit(5000)  # 🔥 재귀 호출 한도 증가
 
 
 def Hough(edges):
@@ -63,12 +65,10 @@ def line_detector(img_gray):
     # 선 감지
     lines, _, _, _ = detector.detect(img_gray)
     lines = lines.squeeze()
-    print(len(lines))
+    start_time = time.time()
     merged_lines = merge_all_segments(lines)
     # 감지된 선 그리기
     drawing_paper = np.ones_like(img_gray) * 255
-    print("그림 시작")
-    print(len(merged_lines))
     for line in merged_lines:
         x1, y1, x2, y2 = line
         cv2.line(drawing_paper, (int(x1), int(y1)), (int(x2), int(y2)), 0, 2)
@@ -77,6 +77,8 @@ def line_detector(img_gray):
         output_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )[1]
     output_img_binary_inversed = 255 - output_img_binary
+    end_time = time.time()
+    print(end_time - start_time)
     return output_img_binary_inversed
 
 
@@ -140,16 +142,20 @@ def canny(img):
 
 
 if __name__ == "__main__":
-    file_name = "pink1"
+    file_name = "purple1"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
     image = cv2.imread(image_path)
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    img_gray, _ = morphology_diff(image)
+    _, _, _, img_gray, _, _ = morphology_diff(image)
     # img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     line_image = line_detector_without_merge(img_gray)
+    merged_lines = line_detector(line_image)
     # contour_image = contours(line_image)
-    # cv2.imwrite("output_image.png", line_image)
-    plt.imshow(line_image, cmap="gray")
+    combined_image = np.hstack((merged_lines, line_image))
+    cv2.imwrite(
+        f"./shape_detect_output/{file_name}_combined_output.png", combined_image
+    )
+    plt.imshow(combined_image, cmap="gray")
     plt.title("Detected Lines")
     plt.show()
