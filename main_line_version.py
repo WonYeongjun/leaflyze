@@ -33,54 +33,38 @@ class PointInfo:
 
 if __name__ == "__main__":
     start_time = time.time()
-    file_name = "purple1"
+    file_name = "white2"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     img_bgr = cv2.imread(image_path)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    img_bgr, mask = masking_honeycomb(img_bgr)
+    img_bgr, mask, _ = masking_honeycomb(img_bgr)
 
     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     img_binary = cv2.threshold(img_gray, 220, 255, cv2.THRESH_BINARY)[1]
-    pyplot.imshow(img_binary, cmap="gray")
-    pyplot.show()
+    kernel = np.ones((5, 5), np.uint8)
+    img_binary = cv2.dilate(img_binary, kernel, iterations=1)
     _, img_gray, _ = morphology_diff_binary(img_bgr)
-    pyplot.imshow(img_gray, cmap="gray")
-    pyplot.show()
-    img_binary = cv2.bitwise_and(img_binary, img_gray)
-    pyplot.imshow(img_binary, cmap="gray")
-    pyplot.show()
+    img_gray = cv2.bitwise_and(img_gray, img_binary)
 
-    shape_image = detect_SED(img_bgr)
-    shape_image = cv2.threshold(
-        shape_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-    )[1]
-    shape_image = cv2.bitwise_and(shape_image, img_binary)
-    pyplot.imshow(shape_image, cmap="gray")
-    pyplot.show()
     # img_gray = cv2.threshold(img_gray, 148, 255, cv2.THRESH_BINARY)[1]
     # img_gray = 255 - cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    # shape_image = line_detector(img_gray)
+    _, shape_image = line_detector(img_gray)
 
-    # kernel = np.ones((5, 5), np.uint8)
-    # shape_image = cv2.dilate(shape_image, kernel, iterations=1)
-
-    # pyplot.imshow(shape_image, cmap="gray")
-    # pyplot.show()
-    img_bgr = 255 - img_bgr
-    shape_image = detect_SED(cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB))
-
+    shape_image = cv2.dilate(shape_image, kernel, iterations=1)
     kernel_mask = np.ones((15, 15), np.uint8)
     mask = cv2.erode(mask, kernel_mask, iterations=1)
     shape_image = cv2.bitwise_and(shape_image, mask)
+    img_binary = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    shape_image = cv2.bitwise_and(shape_image, img_binary)
     pyplot.imshow(shape_image, cmap="gray")
     pyplot.show()
 
     result_rough = []
-    width = 1800  # 1686 #TODO: Change this to the actual size of the square
-    height = 1300  # 1378 #TODO: Change this to the actual size of the square
+    width = 1000  # 1686 #TODO: Change this to the actual size of the square
+    height = 1000  # 1378 #TODO: Change this to the actual size of the square
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
-    for angle in range(0, 351, 25):
+    for angle in range(-350, 351, 25):
         template = make_rect((width, height), angle / 10, 31)
         template = cv2.blur(template, (5, 5))
         template_mask = make_rect((width, height), angle / 10, 51)
