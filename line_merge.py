@@ -6,10 +6,10 @@ from collections import defaultdict
 def calculate_angle(x1, y1, x2, y2):
     """두 점을 연결하는 선의 각도(기울기) 계산 (라디안 -> 도)"""
     angle = np.degrees(np.arctan2(y2 - y1, x2 - x1))
-    # if angle > 135:
-    #     angle -= 180
-    # elif angle < -45:
-    #     angle += 180
+    if angle > 135:
+        angle -= 180
+    elif angle < -45:
+        angle += 180
     return angle
 
 
@@ -50,7 +50,7 @@ def find_connected_segments(segments, distance_threshold=50, angle_threshold=10.
                 if (
                     neighbor != i
                     and r < distance_threshold
-                    and abs(angle_i - angle_new) < 2 * angle_threshold
+                    and abs(angle_i - angle_new) < angle_threshold
                 ):
                     # print(angle_i, angle_j, angle_new, abs(angle_i - angle_j))
                     if abs(angle_i - angle_j) < angle_threshold:
@@ -69,7 +69,7 @@ def find_connected_segments(segments, distance_threshold=50, angle_threshold=10.
                 if (
                     neighbor != i
                     and r < distance_threshold
-                    and abs(angle_i - angle_new) < 2 * angle_threshold
+                    and abs(angle_i - angle_new) < angle_threshold
                 ):
                     # print(angle_i, angle_j, angle_new, abs(angle_i - angle_j))
                     if abs(angle_i - angle_j) < angle_threshold:
