@@ -28,11 +28,11 @@ def morphology_diff(image):
 
 def morphology_diff_binary(image):
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
-    img_morphed = cv2.morphologyEx(image, cv2.MORPH_CLOSE, kernel)
+    img_morphed = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
     difference = cv2.absdiff(image, img_morphed)
     difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
-    difference_gray = 255 - difference_gray
+    # difference_gray = 255 - difference_gray
 
     blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)
     sharp = cv2.addWeighted(difference_gray, 1.5, blurred, -0.5, 0)
