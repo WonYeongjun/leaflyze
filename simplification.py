@@ -27,7 +27,7 @@ def morphology_diff(image):
 
 
 def morphology_diff_binary(image):
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (31, 31))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (101, 101))
     img_morphed = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
     difference = cv2.absdiff(image, img_morphed)
