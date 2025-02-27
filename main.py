@@ -32,86 +32,52 @@ class PointInfo:
 
 if __name__ == "__main__":
     start_time = time.time()
-    file_name = "black2"
+    file_name = "white2"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     img_bgr = cv2.imread(image_path)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     img_bgr, mask, edges_image = masking_honeycomb(img_bgr)
-    pyplot.imshow(edges_image, cmap="gray")
-    pyplot.title("SED")
-    pyplot.savefig(f"C:\\Users\\UserK\\Desktop\\{file_name}\\SED.png")
-    pyplot.show()
 
     img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
     img_binary = cv2.threshold(img_gray, 220, 255, cv2.THRESH_BINARY)[1]
-    pyplot.imshow(img_binary, cmap="gray")
-    pyplot.title("Binary Image 220")
-    pyplot.savefig(f"C:\\Users\\UserK\\Desktop\\{file_name}\\Binary Image 220.png")
-    pyplot.show()
 
-    _, img_gray, _ = morphology_diff_binary(img_bgr)
-    pyplot.imshow(img_gray, cmap="gray")
-    pyplot.title("Morphology Difference")
-    pyplot.savefig(f"C:\\Users\\UserK\\Desktop\\{file_name}\\Morphology Difference.png")
-    pyplot.show()
+    _, morphed_image, _ = morphology_diff_binary(img_bgr)
 
-    img_binary = cv2.bitwise_and(img_binary, img_gray)
-    pyplot.imshow(img_binary, cmap="gray")
-    pyplot.title("Binary Image 220 & Morphology Difference")
-    pyplot.savefig(
-        f"C:\\Users\\UserK\\Desktop\\{file_name}\\Binary Image 220 & Morphology Difference.png"
+    morph_edges_image = detect_SED(cv2.cvtColor(morphed_image, cv2.COLOR_GRAY2BGR))
+
+    morphed_image_binary = cv2.threshold(morphed_image, 30, 255, cv2.THRESH_BINARY)[1]
+    image_binary_and_morphed_image_binary = cv2.bitwise_and(
+        img_binary, morphed_image_binary
     )
-    pyplot.show()
 
     kernel_mask = np.ones((15, 15), np.uint8)
     mask = cv2.erode(mask, kernel_mask, iterations=1)
-    morph_edges_image = detect_SED(cv2.cvtColor(img_gray, cv2.COLOR_GRAY2BGR))
-    pyplot.imshow(morph_edges_image, cmap="gray")
-    pyplot.title("morphed_image_SED")
-    pyplot.savefig(f"C:\\Users\\UserK\\Desktop\\{file_name}\\morphed_image_SED.png")
-    pyplot.show()
 
     edges_image_combined = cv2.bitwise_or(edges_image, morph_edges_image)
-    pyplot.imshow(edges_image_combined, cmap="gray")
-    pyplot.title("SED || morphed_image_SED")
-    pyplot.savefig(
-        f"C:\\Users\\UserK\\Desktop\\{file_name}\\SED_combined or morphed_image_SED.png"
-    )
-    pyplot.show()
 
     edges_image_combined = cv2.bitwise_and(edges_image_combined, mask)
     edges_image_combined = cv2.threshold(
         edges_image_combined, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )[1]
-    edges_image_combined = cv2.bitwise_and(edges_image_combined, img_binary)
-    pyplot.imshow(edges_image_combined, cmap="gray")
-    pyplot.title("SED_combined & Binary Image 220 & Morphology Difference")
-    pyplot.savefig(
-        f"C:\\Users\\UserK\\Desktop\\{file_name}\\SED_combined & Binary Image 220 & Morphology Difference.png"
+    edges_image_combined = cv2.bitwise_and(
+        edges_image_combined, image_binary_and_morphed_image_binary
     )
-    pyplot.show()
 
     edges_image = cv2.bitwise_and(edges_image, mask)
     edges_image = cv2.threshold(
         edges_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )[1]
-    edges_image = cv2.bitwise_and(edges_image, img_binary)
-    pyplot.imshow(edges_image, cmap="gray")
-    pyplot.title("SED & Binary Image 220 & Morphology Difference")
-    pyplot.savefig(
-        f"C:\\Users\\UserK\\Desktop\\{file_name}\\SED & Binary Image 220 & Morphology Difference.png"
-    )
-    pyplot.show()
+    edges_image = cv2.bitwise_and(edges_image, image_binary_and_morphed_image_binary)
 
     result_rough = []
-    width = 1800  # 1686 #TODO: Change this to the actual size of the square
-    height = 1300  # 1378 #TODO: Change this to the actual size of the square
+    width = 1000  # 1686 #TODO: Change this to the actual size of the square
+    height = 1000  # 1378 #TODO: Change this to the actual size of the square
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
     for angle in range(-350, 351, 25):
-        template = make_rect((width, height), angle / 10, 21)
+        template = make_rect((width, height), angle / 10, 31)
         template = cv2.blur(template, (5, 5))
-        template_mask = make_rect((width, height), angle / 10, 31)
+        template_mask = make_rect((width, height), angle / 10, 51)
         hotmap = cv2.matchTemplate(
             edges_image_combined, template, cv2.TM_CCORR, mask=template_mask
         )
@@ -140,12 +106,12 @@ if __name__ == "__main__":
     point_info_rough = point_info_list_rough[:2]
     result = []
     point_info_rough.sort(key=lambda point: point.angle)
-    print(point_info_rough[0].angle, point_info_rough[1].angle)
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
+    print(point_info_rough[0].angle, point_info_rough[1].angle)
     for angle in range(point_info_rough[0].angle, point_info_rough[1].angle + 1, 1):
-        template = make_rect((width, height), angle / 10, 21)
+        template = make_rect((width, height), angle / 10, 31)
         template = cv2.blur(template, (5, 5))
-        template_mask = make_rect((width, height), angle / 10, 31)
+        template_mask = make_rect((width, height), angle / 10, 51)
         hotmap = cv2.matchTemplate(
             edges_image_combined, template, cv2.TM_CCORR, mask=template_mask
         )
@@ -159,8 +125,6 @@ if __name__ == "__main__":
                 max_value,
             ]
         )
-
-    end_time = time.time()
 
     point_info_list = [
         PointInfo(
@@ -190,6 +154,6 @@ if __name__ == "__main__":
         f"C:\\Users\\UserK\\Desktop\\{file_name}\\result.png",
         cv2.cvtColor(combined_image, cv2.COLOR_RGB2BGR),
     )
-
+    end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"작업에 걸린 시간: {elapsed_time} 초")
