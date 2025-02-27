@@ -24,17 +24,17 @@ def masking_honeycomb(image):
     mask = cv2.bitwise_xor(mask1, mask2)
     mask = cv2.bitwise_not(mask)
 
-    # for i, contour in enumerate(top_10_contours):
-    #     cv2.drawContours(image, [contour], -1, colors[i % len(colors)], 2)
+    # for i, contour in enumerate(contours):
+    #     cv2.drawContours(image, [contour], -1, (255, 0, 0), thickness=2)
     result_image = cv2.bitwise_and(image, image, mask=mask)
     return result_image, mask, shape_image
 
 
 if __name__ == "__main__":
-    file_name = "pink1"
+    file_name = "white2"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     image = cv2.imread(image_path)
-    result_image = masking_honeycomb(image)
+    result_image, mask, shape_image = masking_honeycomb(image)
     plt.imshow(cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB))
     plt.show()
