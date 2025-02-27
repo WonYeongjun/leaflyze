@@ -65,21 +65,18 @@ def line_detector(img_gray):
     # 선 감지
     lines, _, _, _ = detector.detect(img_gray)
     lines = lines.squeeze()
-    start_time = time.time()
     merged_lines = merge_all_segments(lines)
     # 감지된 선 그리기
-    drawing_paper = np.ones_like(img_gray) * 255
+    output_img_merged = np.zeros_like(img_gray)
     for line in merged_lines:
         x1, y1, x2, y2 = line
-        cv2.line(drawing_paper, (int(x1), int(y1)), (int(x2), int(y2)), 0, 2)
-    output_img = drawing_paper
-    output_img_binary = cv2.threshold(
-        output_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-    )[1]
-    output_img_binary_inversed = 255 - output_img_binary
-    end_time = time.time()
-    print(end_time - start_time)
-    return output_img_binary_inversed
+        cv2.line(output_img_merged, (int(x1), int(y1)), (int(x2), int(y2)), 255, 2)
+    output_img_not_merged = np.zeros_like(img_gray)
+    for line in lines:
+        x1, y1, x2, y2 = line
+        cv2.line(output_img_not_merged, (int(x1), int(y1)), (int(x2), int(y2)), 255, 2)
+
+    return output_img_merged, output_img_not_merged
 
 
 def line_detector_without_merge(img_gray):
@@ -103,11 +100,11 @@ def line_detector_without_merge(img_gray):
 def detect_SED(img_bgr):
     model = "model.yml.gz"  # 미리 학습된 모델 필요
     edge_detector = cv2.ximgproc.createStructuredEdgeDetection(model)
-    img_bgr = cv2.resize(img_bgr, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
+    # img_bgr = cv2.resize(img_bgr, None, fx=2, fy=2, interpolation=cv2.INTER_LINEAR)
     edges = edge_detector.detectEdges(np.float32(img_bgr) / 255.0)
     edges = edges * 255
     edges = edges.astype(np.uint8)
-    edges = cv2.resize(edges, None, fx=0.5, fy=0.5)
+    # edges = cv2.resize(edges, None, fx=0.5, fy=0.5)
     return edges
 
 
