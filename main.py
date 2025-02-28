@@ -2,10 +2,9 @@ import time
 
 import numpy as np
 import cv2
-import matplotlib.pyplot as pyplot
 
 from simplification import morphology_diff_binary
-from shape_detect import detect_SED
+from shape_detect import detect_SED, line_detector_without_merge
 from get_contours_of_honeycomb import masking_honeycomb
 
 
@@ -32,7 +31,7 @@ class PointInfo:
 
 if __name__ == "__main__":
     start_time = time.time()
-    file_name = "white2"
+    file_name = "white2_rot"
     image_path = f"C:/Users/UserK/Desktop/fin/{file_name}.jpg"
 
     img_bgr = cv2.imread(image_path)
@@ -63,12 +62,7 @@ if __name__ == "__main__":
     edges_image_combined = cv2.bitwise_and(
         edges_image_combined, image_binary_and_morphed_image_binary
     )
-
-    edges_image = cv2.bitwise_and(edges_image, mask)
-    edges_image = cv2.threshold(
-        edges_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-    )[1]
-    edges_image = cv2.bitwise_and(edges_image, image_binary_and_morphed_image_binary)
+    lines = line_detector_without_merge(edges_image_combined)
 
     result_rough = []
     width = 1000  # 1686 #TODO: Change this to the actual size of the square
@@ -78,9 +72,7 @@ if __name__ == "__main__":
         template = make_rect((width, height), angle / 10, 31)
         template = cv2.blur(template, (5, 5))
         template_mask = make_rect((width, height), angle / 10, 51)
-        hotmap = cv2.matchTemplate(
-            edges_image_combined, template, cv2.TM_CCORR, mask=template_mask
-        )
+        hotmap = cv2.matchTemplate(lines, template, cv2.TM_CCORR, mask=template_mask)
 
         max_value = np.max(hotmap)
         max_index = np.unravel_index(np.argmax(hotmap), hotmap.shape)
@@ -108,13 +100,28 @@ if __name__ == "__main__":
     point_info_rough.sort(key=lambda point: point.angle)
     template = np.ones((int(height * 1.2), int(width * 1.2)), dtype=np.uint8) * 255
     print(point_info_rough[0].angle, point_info_rough[1].angle)
+
+    best_point_in_rough = point_info_list_rough[0]
+
+    cropped = lines[
+        int(best_point_in_rough.y - 0.2 * height) : int(
+            best_point_in_rough.y + 1.4 * height
+        ),
+        int(best_point_in_rough.x - 0.2 * width) : int(
+            best_point_in_rough.x + 1.4 * width
+        ),
+    ]
+    is_cropped = True
+    if cropped.size <= 0:
+        is_cropped = False
+        print(cropped.size)
+        cropped = lines
+
     for angle in range(point_info_rough[0].angle, point_info_rough[1].angle + 1, 1):
         template = make_rect((width, height), angle / 10, 31)
         template = cv2.blur(template, (5, 5))
         template_mask = make_rect((width, height), angle / 10, 51)
-        hotmap = cv2.matchTemplate(
-            edges_image_combined, template, cv2.TM_CCORR, mask=template_mask
-        )
+        hotmap = cv2.matchTemplate(cropped, template, cv2.TM_CCORR, mask=template_mask)
         max_value = np.max(hotmap)
         max_index = np.unravel_index(np.argmax(hotmap), hotmap.shape)
         print(f"Max value: {max_value}, Max index: {max_index}, angle: {angle/10}")
@@ -137,8 +144,13 @@ if __name__ == "__main__":
     ]
     point_info_list.sort(key=lambda point: point.score, reverse=True)
     point_info = point_info_list[0]
-
-    center = (point_info.x + 0.6 * width, point_info.y + 0.6 * height)
+    if is_cropped:
+        center = (
+            point_info.x + 0.4 * width + best_point_in_rough.x,
+            point_info.y + 0.4 * height + best_point_in_rough.y,
+        )
+    else:
+        center = (point_info.x + 0.6 * width, point_info.y + 0.6 * height)
     rotated_rect = ((center), (width, height), point_info.angle)
 
     box = cv2.boxPoints(rotated_rect)
