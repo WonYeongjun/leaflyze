@@ -85,7 +85,6 @@ def line_detector_without_merge(img_gray):
 
     # 선 감지
     lines = detector.detect(img_gray)[0]
-    print(lines[0, 0])
     # 감지된 선 그리기
     drawing_paper = np.ones_like(img_gray) * 255
     output_img = detector.drawSegments(drawing_paper, lines)

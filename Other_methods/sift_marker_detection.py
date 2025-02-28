@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from get_point_of_interest import get_point_of_interest
-from simplification import morphology_diff
 
 
 def extract_sift_features(img):
@@ -101,18 +99,18 @@ def find_multiple_markers(
 
 if __name__ == "__main__":
     # 이미지 파일 경로
-    image_path = "./image/pink/fin_cal_img_20250207_141129.jpg"  # 예: "sample.jpg"
+    image_path = "C:/Users/UserK/Desktop/white1/SED_combined or morphed_image_SED.png"  # 예: "sample.jpg"
     template_path = "./image/marker_4.png"
     # 이미지 및 템플릿 로드
     image = cv2.imread(image_path)
-    image = get_point_of_interest(image)
-    image, _ = morphology_diff(image)
+    # image = get_point_of_interest(image)
     template = cv2.imread(template_path)
 
     # 템플릿에서 SIFT 특징점 및 기술자 추출
     result_img_template, keypoints_template, descriptors_template = (
-        extract_sift_features(template)
+        extract_sift_features(image)
     )
+    cv2.imwrite("C:/Users/UserK/Desktop/white1/sift_SEDs.png", result_img_template)
 
     # 타깃 이미지에서 다중 마커 찾기
-    find_multiple_markers(image, template, descriptors_template, keypoints_template)
+    # find_multiple_markers(image, template, descriptors_template, keypoints_template)

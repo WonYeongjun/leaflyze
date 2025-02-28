@@ -1,120 +1,109 @@
-import time
+import glob
 
 import cv2
-import matplotlib
-from matplotlib import pyplot, patches
-
-from invariant_match_template import invariant_match_template
-from get_point_of_interest import get_point_of_interest
-from simplification import *
-
-start_time = time.time()
+import numpy as np
+import matplotlib.pyplot as plt
+from shape_detect import detect_SED, canny, line_detector
 
 
-example_fabric_type = "pink"
+def morphology_diff(image):
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (101, 101))
+    img_eroded = cv2.erode(image, kernel, iterations=1)
+    img_morphed = cv2.dilate(img_eroded, kernel, iterations=1)
+
+    difference_with_morph = cv2.absdiff(image, img_morphed)
+    difference_with_morph_gray = cv2.cvtColor(difference_with_morph, cv2.COLOR_BGR2GRAY)
+    difference_with_morph_gray_inversed = 255 - difference_with_morph_gray
+    blurred = cv2.GaussianBlur(difference_with_morph_gray_inversed, (5, 5), 10)
+    contour_emphasized = cv2.addWeighted(
+        difference_with_morph_gray_inversed, 1.5, blurred, -0.5, 0
+    )
+    sharp_blurred = cv2.GaussianBlur(contour_emphasized, (5, 5), 10)
+    return (
+        img_eroded,
+        img_morphed,
+        difference_with_morph_gray,
+        difference_with_morph_gray_inversed,
+        contour_emphasized,
+        sharp_blurred,
+    )
 
 
-class PointInfo:
-    def __init__(self, x, y, angle, scale, score):
-        self.x = x
-        self.y = y
-        self.angle = angle
-        self.scale = scale
-        self.score = score
+def morphology_diff_binary(image):
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (101, 101))
+    img_morphed = cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+    difference = cv2.absdiff(image, img_morphed)
+    difference_gray = cv2.cvtColor(difference, cv2.COLOR_BGR2GRAY)
+    # difference_gray = 255 - difference_gray
+
+    blurred = cv2.GaussianBlur(difference_gray, (9, 9), 10)
+    sharp = cv2.addWeighted(difference_gray, 1.5, blurred, -0.5, 0)
+
+    img_binary = cv2.threshold(sharp, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    return difference_gray, sharp, img_binary
+
+
+def morph(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    kernel = np.ones((5, 5), np.uint8)
+    morph_img = cv2.morphologyEx(image_gray, cv2.MORPH_CLOSE, kernel)
+
+    return morph_img
+
+
+def blur(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    blur_img = cv2.GaussianBlur(image_gray, (5, 5), 0)
+
+    return blur_img
+
+
+def nothing(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    return image_gray
+
+
+def process_image(image_path):
+    img = cv2.imread(image_path)
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img_gray = 255 - img_gray
+
+    blurred = blur(img)
+    morphed_grad = morph(img)
+    morphed, _, _ = morphology_diff_binary(img)
+    result_image = detect_SED(cv2.cvtColor(morphed, cv2.COLOR_GRAY2BGR))
+    canny_image = canny(morphed)
+    merged_image, not_merged_image = line_detector(morphed)
+    combined_image = np.hstack(
+        [
+            img,
+            cv2.cvtColor(canny_image, cv2.COLOR_GRAY2RGB),
+            cv2.cvtColor(result_image, cv2.COLOR_GRAY2RGB),
+            cv2.cvtColor(merged_image, cv2.COLOR_GRAY2RGB),
+            cv2.cvtColor(not_merged_image, cv2.COLOR_GRAY2RGB),
+        ]
+    )
+    return combined_image
 
 
 if __name__ == "__main__":
-    ans_list = []
-    # image_files = glob.glob(f"./image/{example_fabric_type}/*.jpg")
-    image_path = "C:/Users/UserK/Desktop/fin/black1.jpg"
 
-    img_bgr = cv2.imread(image_path)
-    # img_bgr = get_point_of_interest(img_bgr)
-    img_gray = nothing(img_bgr)
-    # img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    threshold_value = 50  # You can change this value to set your own threshold
-    # _, img_gray = cv2.threshold(img_gray, threshold_value, 255, cv2.THRESH_BINARY)
-    img_rgb = cv2.cvtColor(img_gray, cv2.COLOR_GRAY2RGB)
-    pyplot.imshow(img_rgb)
-    pyplot.show()
-    template_bgr = cv2.imread("./image/marker_4.png")
-    template_bgr = cv2.resize(
-        template_bgr, (0, 0), fx=0.9, fy=0.9
-    )  # TODO: 템플릿 사이즈 조절
-    template_gray = cv2.cvtColor(template_bgr, cv2.COLOR_RGB2GRAY)
-    # template_blur = cv2.GaussianBlur(template_gray, (11, 11), 0)
-    height, width = template_gray.shape
+    folder_path = "C:/Users/UserK/Desktop/fin"
+    image_paths = glob.glob(f"{folder_path}/*.jpg")
 
-    result = invariant_match_template(
-        grayimage=img_gray,
-        graytemplate=template_gray,
-        matched_thresh=0.4,
-        rot_range=[-10, 10],
-        rot_interval=2,
-        scale_range=[90, 110],
-        scale_interval=2,
-    )
+    result_images = []
+    for image_path in image_paths:
+        result_image = process_image(image_path)
+        result_images.append(result_image)
+        print(f"Processed {image_path}")
+    combined_image = np.vstack(result_images)
 
-    point_info_list = [
-        PointInfo(
-            x=point_info[0][0],
-            y=point_info[0][1],
-            angle=point_info[1],
-            scale=point_info[2],
-            score=point_info[3],
-        )
-        for point_info in result
-    ]
-    fig, axes = pyplot.subplots(1)
-    axes.imshow(img_rgb)
-    pyplot.gcf().canvas.manager.set_window_title("Template Matching Results: Grid")
-    # point_info_list = point_info_list[:10]
-    for i, point_info in enumerate(point_info_list):
-        print(
-            f"No.{i} matched point: {(point_info.x,point_info.y)}, angle: {point_info.angle}, scale: {point_info.scale}, score: {point_info.score}"
-        )
-        axes.scatter(
-            point_info.x + (width / 2) * point_info.scale[0] / 100,
-            point_info.y + (height / 2) * point_info.scale[1] / 100,
-            s=20,
-            color="red",
-        )
-        idx = (
-            point_info.x + (width / 2) * point_info.scale[0] / 100,
-            point_info.y + (height / 2) * point_info.scale[1] / 100,
-        )
-        axes.scatter(point_info.x, point_info.y, s=20, color="green")
-        rectangle = patches.Rectangle(
-            (point_info.x, point_info.y),
-            width * point_info.scale[0] / 100,
-            height * point_info.scale[1] / 100,
-            color="red",
-            alpha=0.50,
-            label="Matched box",
-        )
-        axes.text(
-            point_info.x,
-            point_info.y - 10,
-            f"{str(i)} : {point_info.score:.3f}",
-            color="blue",
-            fontsize=12,
-            weight="bold",
-        )
-        transform = (
-            matplotlib.transforms.Affine2D().rotate_deg_around(
-                point_info.x + width / 2 * point_info.scale[0] / 100,
-                point_info.y + height / 2 * point_info.scale[1] / 100,
-                point_info.angle,
-            )
-            + axes.transData
-        )
-        rectangle.set_transform(transform)
-        axes.add_patch(rectangle)
-    axes.grid(True)
-    axes.legend(handles=[rectangle])
+    # 결합된 이미지 저장
+    combined_image_path = "C:/Users/UserK/Desktop/fin/combined_result.png"
+    cv2.imwrite(combined_image_path, combined_image)
 
-    end_time = time.time()
-    pyplot.show()
-
-    elapsed_time = end_time - start_time
-    print(f"작업에 걸린 시간: {elapsed_time} 초")
+    # 결합된 이미지 시각화
+    plt.imshow(combined_image, cmap="gray")
+    plt.title("Combined Result Image")
+    plt.show()

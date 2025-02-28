@@ -36,8 +36,7 @@ if __name__ == "__main__":
 
     img_bgr = cv2.imread(image_path)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    # img_bgr, mask, edges_image = masking_honeycomb(img_bgr)
-    edges_image = detect_SED(img_bgr)
+    img_bgr, mask, edges_image = masking_honeycomb(img_bgr)
     cv2.imwrite(
         f"C:\\Users\\UserK\\Desktop\\{file_name}\\SED.png",
         cv2.cvtColor(edges_image, cv2.COLOR_RGB2BGR),
@@ -71,8 +70,8 @@ if __name__ == "__main__":
         image_binary_and_morphed_image_binary,
     )
 
-    # kernel_mask = np.ones((15, 15), np.uint8)
-    # mask = cv2.erode(mask, kernel_mask, iterations=1)
+    kernel_mask = np.ones((15, 15), np.uint8)
+    mask = cv2.erode(mask, kernel_mask, iterations=1)
 
     cv2.imwrite(
         f"C:\\Users\\UserK\\Desktop\\{file_name}\\morphed_image_SED.png",
@@ -85,7 +84,7 @@ if __name__ == "__main__":
         edges_image_combined,
     )
 
-    # edges_image_combined = cv2.bitwise_and(edges_image_combined, mask)
+    edges_image_combined = cv2.bitwise_and(edges_image_combined, mask)
     edges_image_combined = cv2.threshold(
         edges_image_combined, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )[1]
@@ -101,7 +100,7 @@ if __name__ == "__main__":
 
     cv2.imwrite(f"C:\\Users\\UserK\\Desktop\\{file_name}\\Lines.png", lines)
 
-    # edges_image = cv2.bitwise_and(edges_image, mask)
+    edges_image = cv2.bitwise_and(edges_image, mask)
     edges_image = cv2.threshold(
         edges_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )[1]

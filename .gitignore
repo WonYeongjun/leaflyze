@@ -182,4 +182,10 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Result images
+*.png
+*.jpg
+
+# SED model
+*.gz
 # End of https://www.toptal.com/developers/gitignore/api/python,opencv
